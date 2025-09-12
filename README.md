@@ -16,6 +16,22 @@ A React application to convert from CBOR (Concise Binary Object Representation) 
 - **💾 Save to Disk**: Download converted JSON files with original filenames
 - **🧹 Smart Clear**: Reset to upload new files or return to upload interface
 
+### 🛡️ Security & Privacy
+
+- **🔒 Client-Side Processing** - Files never leave your browser
+- **🚫 No Data Collection** - Zero tracking or analytics
+- **🔐 Secure File Handling** - Modern Web APIs with security best practices
+- **🛡️ Content Security Policy** - Protection against XSS attacks
+
+##" 📊 Performance Benchmarks
+
+- **🚀 Load Time**: <2s on 3G networks
+- **📱 Mobile Score**: 95+ Lighthouse performance
+- **♿ Accessibility**: WCAG 2.1 AA compliant
+- **📏 Bundle Size**: <200KB gzipped
+- **🔄 File Processing**: Handles files up to 50MB efficiently
+
+
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -255,30 +271,9 @@ We welcome contributions! Here's how you can help:
 - Fix typos or clarify instructions
 - Add examples or use cases
 
-## 📊 Performance Benchmarks
-
-- **🚀 Load Time**: <2s on 3G networks
-- **📱 Mobile Score**: 95+ Lighthouse performance
-- **♿ Accessibility**: WCAG 2.1 AA compliant
-- **📏 Bundle Size**: <200KB gzipped
-- **🔄 File Processing**: Handles files up to 50MB efficiently
-
-## 🛡️ Security & Privacy
-
-- **🔒 Client-Side Processing** - Files never leave your browser
-- **🚫 No Data Collection** - Zero tracking or analytics
-- **🔐 Secure File Handling** - Modern Web APIs with security best practices
-- **🛡️ Content Security Policy** - Protection against XSS attacks
-
 ## 📄 License
 
 This project is open source and available under the **[MIT License](LICENSE)**.
-
-```
-MIT License - feel free to use, modify, and distribute
-Commercial use, modification, and distribution permitted
-No warranty provided - use at your own risk
-```
 
 ## 🙏 Acknowledgments
 
