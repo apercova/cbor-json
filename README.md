@@ -4,6 +4,8 @@ A modern, responsive React application that converts CBOR (Concise Binary Object
 
 ![React](https://img.shields.io/badge/React-18.2.0-blue?logo=react) ![TypeScript](https://img.shields.io/badge/TypeScript-4.9.0-blue?logo=typescript) ![License](https://img.shields.io/badge/License-MIT-green) ![Build](https://img.shields.io/badge/Build-Passing-brightgreen)
 
+<img width="1101" height="585" alt="Screenshot 2025-09-11 at 20 42 34" src="https://github.com/user-attachments/assets/c9f6c629-757c-4a8d-9743-f3a0f725ce92" />
+
 ## ✨ Features
 
 ### 🎯 Core Functionality
