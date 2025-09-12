@@ -164,11 +164,11 @@ src/
 │   ├── cborProcessor.ts      # 🔢 CBOR to JSON conversion
 │   └── editorConfig.ts       # ⚙️ CodeMirror configuration
 ├── constants/                # Application constants
-│   └── index.ts             # 📊 Shared constants and thresholds
-├── App.tsx                  # 🏠 Main application component
-├── App.css                  # 🎨 Global application styles
-├── index.tsx               # 🚀 React application entry point
-└── index.css               # 🌐 Global CSS reset and base styles
+│   └── index.ts              # 📊 Shared constants and thresholds
+├── App.tsx                   # 🏠 Main application component
+├── App.css                   # 🎨 Global application styles
+├── index.tsx                 # 🚀 React application entry point
+└── index.css                 # 🌐 Global CSS reset and base styles
 ```
 
 ## 🌍 Browser Compatibility
