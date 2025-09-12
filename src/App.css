@@ -1,0 +1,142 @@
+.App {
+  text-align: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.App-header {
+  display: flex;
+  flex-direction: column;
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 0.7rem 0;
+  color: white;
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.header-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1rem;
+  position: relative;
+}
+
+
+
+.App-header h1 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+
+
+.main-container {
+  padding: 0.3rem;
+  max-width: 100%;
+  margin: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.panel-container {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.panel {
+  width: 100%;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  backdrop-filter: blur(10px);
+  border: none;  
+}
+
+.panel h2 {
+  margin: 0;
+  color: #333;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.App-footer {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+  text-align: center;
+  padding: 0.1rem 0.1rem 0.3rem 0.1rem;
+  font-size: 0.8rem;
+  opacity: 0.9;
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  flex-shrink: 0;
+}
+
+.App-footer a {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  transition: opacity 0.2s ease;
+}
+
+.App-footer a:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+/* Responsive design */
+
+/* Mid-screen and larger: single line header */
+@media (min-width: 769px) {
+  .header-content {
+    flex-direction: row;
+  }
+
+  .title-section {
+    display: flex;
+    margin-right: auto;
+  }
+}
+
+/* Small screens: separate lines */
+@media (max-width: 768px) {
+  .main-container {
+    padding: 0.1rem;
+  }
+  
+  .App-header h1 {
+    font-size: 1.2rem;
+  }
+  
+  .App-header {
+    padding: 0.75rem 0;
+  }
+  
+  .panel {
+    min-height: 300px;
+    padding: 1rem;
+  }
+  
+  .header-content {
+    gap: 0.5rem;
+  }
+
+  .App-footer {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.75rem;
+  }
+}
