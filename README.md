@@ -1,6 +1,6 @@
 # CBOR to JSON Converter
 
-A modern, responsive React application that converts CBOR (Concise Binary Object Representation) files to JSON with a beautiful, professional interface.
+A React application to convert from CBOR (Concise Binary Object Representation) files to JSON.
 
 ![React](https://img.shields.io/badge/React-18.2.0-blue?logo=react) ![TypeScript](https://img.shields.io/badge/TypeScript-4.9.0-blue?logo=typescript) ![License](https://img.shields.io/badge/License-MIT-green) ![Build](https://img.shields.io/badge/Build-Passing-brightgreen)
 
@@ -15,30 +15,6 @@ A modern, responsive React application that converts CBOR (Concise Binary Object
 - **🔄 Quick File Switching**: "New" button for rapid file uploads without clearing current data
 - **💾 Save to Disk**: Download converted JSON files with original filenames
 - **🧹 Smart Clear**: Reset to upload new files or return to upload interface
-
-### 📝 Professional JSON Editor
-- **🎨 Syntax Highlighting**: Beautiful JSON display powered by CodeMirror 6
-- **📊 Line Numbers**: Easy navigation with line count display
-- **⚙️ Smart File Handling**: 
-  - Small files (<100KB): Fully editable with syntax highlighting
-  - Large files (>100KB): Optimized view-only mode for performance
-- **⚠️ Large File Warnings**: Clear indicators when files exceed editing threshold
-- **⌨️ Keyboard Shortcuts**: Standard editor shortcuts (Cmd+A, Escape, etc.)
-- **🔍 Code Folding**: Collapse JSON objects and arrays for better navigation
-
-### 🎨 Modern UI/UX
-- **📱 Responsive Design**: Perfect on desktop, tablet, and mobile devices
-- **🖥️ Single Panel Interface**: Clean, focused UI that switches between upload and display
-- **⏳ Loading States**: Professional loading indicators during file processing
-- **✨ Glass Morphism**: Modern design with backdrop blur effects
-- **📏 Adaptive Header**: Title and description adapt to different screen sizes
-- **🎯 Intuitive Navigation**: Clear visual feedback and smooth transitions
-
-### 🛡️ Robust Error Handling
-- **❌ Invalid CBOR Format**: Clear messaging for malformed files
-- **🔧 Corrupted Files**: Helpful guidance for incomplete uploads
-- **⚠️ Unsupported Features**: Informative messages for edge cases
-- **🔍 Processing Errors**: User-friendly error descriptions
 
 ## 🚀 Quick Start
 
@@ -309,11 +285,10 @@ No warranty provided - use at your own risk
 ### 🚀 Built With
 - **[cbor-js](https://www.npmjs.com/package/cbor-js)** - Browser-compatible CBOR decoding
 - **[CodeMirror 6](https://codemirror.net/)** - Professional code editing experience
-- **[React](https://reactjs.org/)** - UI library for building interactive interfaces
-- **[Create React App](https://create-react-app.dev/)** - Zero-config React build tooling
+- **[React](https://reactjs.org/)**
 
 ### 👨‍💻 Created By
-**[apercova](https://github.com/apercova)** - Full Stack Developer
+**[apercova](https://github.com/apercova)**
 
 [![GitHub](https://img.shields.io/badge/GitHub-apercova-black?logo=github)](https://github.com/apercova) [![Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Support-orange?logo=buy-me-a-coffee)](https://buymeacoffee.com/apercova)
 
@@ -321,12 +296,11 @@ No warranty provided - use at your own risk
 
 **⭐ Star this repo** if you found it helpful!
 
-**🍴 Fork and deploy** your own instance using our [deployment guide](DEPLOY.md)
+**🍴 Fork and deploy** your own instance using our [deployment guide](docs/DEPLOY.md)
 
 **🐛 Report issues** or **💡 suggest features** via [GitHub Issues](https://github.com/apercova/cbor_json/issues)
 
 ---
 
 **Version:** 1.0.0  
-**Last Updated:** March 2025  
-**Status:** Production Ready 🚀
+**Last Updated:** September 2025
