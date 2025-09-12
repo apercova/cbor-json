@@ -2,7 +2,7 @@
 
 A React application to convert from CBOR (Concise Binary Object Representation) files to JSON.
 
-![React](https://img.shields.io/badge/React-18.2.0-blue?logo=react) ![TypeScript](https://img.shields.io/badge/TypeScript-4.9.0-blue?logo=typescript) ![License](https://img.shields.io/badge/License-MIT-green) ![Build](https://img.shields.io/badge/Build-Passing-brightgreen)
+![License](https://img.shields.io/badge/License-MIT-green) ![React](https://img.shields.io/badge/React-18.2.0-blue?logo=react) ![TypeScript](https://img.shields.io/badge/TypeScript-4.9.0-blue?logo=typescript) [![Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Support-orange?logo=buy-me-a-coffee)](https://buymeacoffee.com/apercova) 
 
 <img width="1101" height="585" alt="Screenshot 2025-09-11 at 20 42 34" src="https://github.com/user-attachments/assets/c9f6c629-757c-4a8d-9743-f3a0f725ce92" />
 
@@ -281,11 +281,6 @@ This project is open source and available under the **[MIT License](LICENSE)**.
 - **[cbor-js](https://www.npmjs.com/package/cbor-js)** - Browser-compatible CBOR decoding
 - **[CodeMirror 6](https://codemirror.net/)** - Professional code editing experience
 - **[React](https://reactjs.org/)**
-
-### 👨‍💻 Created By
-**[apercova](https://github.com/apercova)**
-
-[![GitHub](https://img.shields.io/badge/GitHub-apercova-black?logo=github)](https://github.com/apercova) [![Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Support-orange?logo=buy-me-a-coffee)](https://buymeacoffee.com/apercova)
 
 ---
 
