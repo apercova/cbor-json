@@ -20,6 +20,9 @@
   "bugs": {
     "url": "https://github.com/apercova/cbor-json/issues"
   },
+  "bin": {
+    "cbor2json": "./bin/cbor2json.js"
+  },
   "dependencies": {
     "@codemirror/commands": "^6.8.1",
     "@codemirror/lang-json": "^6.0.2",
@@ -45,6 +48,7 @@
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build",
     "serve": "npx serve -s build",
+    "cbor2json": "node bin/cbor2json.js",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint src --ext .ts,.tsx --fix",
     "type-check": "tsc --noEmit",
