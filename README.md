@@ -1,14 +1,13 @@
 # CBOR to JSON Converter
 
-A React application to convert from CBOR (Concise Binary Object Representation) files to JSON.
+A modern, responsive React application that converts CBOR (Concise Binary Object Representation) files to JSON with a beautiful, professional interface.
 
-![License](https://img.shields.io/badge/License-MIT-green) ![React](https://img.shields.io/badge/React-18.2.0-blue?logo=react) ![TypeScript](https://img.shields.io/badge/TypeScript-4.9.0-blue?logo=typescript) [![Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Support-orange?logo=buy-me-a-coffee)](https://buymeacoffee.com/apercova) 
-
-<img width="1101" height="585" alt="Screenshot 2025-09-11 at 20 42 34" src="https://github.com/user-attachments/assets/c9f6c629-757c-4a8d-9743-f3a0f725ce92" />
+![React](https://img.shields.io/badge/React-18.2.0-blue?logo=react) ![TypeScript](https://img.shields.io/badge/TypeScript-4.9.0-blue?logo=typescript) ![License](https://img.shields.io/badge/License-MIT-green) ![Build](https://img.shields.io/badge/Build-Passing-brightgreen)
 
 ## ✨ Features
 
 ### 🎯 Core Functionality
+- **🖥️ CLI Tool**: Convert CBOR files to JSON from the command line with `--in` and `--out` flags
 - **🚀 Drag & Drop Interface**: Simply drag CBOR files onto the upload area
 - **📁 File Browser**: Click to browse and select CBOR files (.cbor, .bin)
 - **⚡ Live Conversion**: Real-time conversion from CBOR to JSON with loading indicators
@@ -16,21 +15,29 @@ A React application to convert from CBOR (Concise Binary Object Representation) 
 - **💾 Save to Disk**: Download converted JSON files with original filenames
 - **🧹 Smart Clear**: Reset to upload new files or return to upload interface
 
-### 🛡️ Security & Privacy
+### 📝 Professional JSON Editor
+- **🎨 Syntax Highlighting**: Beautiful JSON display powered by CodeMirror 6
+- **📊 Line Numbers**: Easy navigation with line count display
+- **⚙️ Smart File Handling**: 
+  - Small files (<100KB): Fully editable with syntax highlighting
+  - Large files (>100KB): Optimized view-only mode for performance
+- **⚠️ Large File Warnings**: Clear indicators when files exceed editing threshold
+- **⌨️ Keyboard Shortcuts**: Standard editor shortcuts (Cmd+A, Escape, etc.)
+- **🔍 Code Folding**: Collapse JSON objects and arrays for better navigation
 
-- **🔒 Client-Side Processing** - Files never leave your browser
-- **🚫 No Data Collection** - Zero tracking or analytics
-- **🔐 Secure File Handling** - Modern Web APIs with security best practices
-- **🛡️ Content Security Policy** - Protection against XSS attacks
+### 🎨 Modern UI/UX
+- **📱 Responsive Design**: Perfect on desktop, tablet, and mobile devices
+- **🖥️ Single Panel Interface**: Clean, focused UI that switches between upload and display
+- **⏳ Loading States**: Professional loading indicators during file processing
+- **✨ Glass Morphism**: Modern design with backdrop blur effects
+- **📏 Adaptive Header**: Title and description adapt to different screen sizes
+- **🎯 Intuitive Navigation**: Clear visual feedback and smooth transitions
 
-##" 📊 Performance Benchmarks
-
-- **🚀 Load Time**: <2s on 3G networks
-- **📱 Mobile Score**: 95+ Lighthouse performance
-- **♿ Accessibility**: WCAG 2.1 AA compliant
-- **📏 Bundle Size**: <200KB gzipped
-- **🔄 File Processing**: Handles files up to 50MB efficiently
-
+### 🛡️ Robust Error Handling
+- **❌ Invalid CBOR Format**: Clear messaging for malformed files
+- **🔧 Corrupted Files**: Helpful guidance for incomplete uploads
+- **⚠️ Unsupported Features**: Informative messages for edge cases
+- **🔍 Processing Errors**: User-friendly error descriptions
 
 ## 🚀 Quick Start
 
@@ -57,6 +64,38 @@ npm start
 ```
 
 Open [http://localhost:3000](http://localhost:3000) to view the app.
+
+### CLI Usage
+
+Convert CBOR files to JSON from the command line:
+
+```bash
+# With explicit output file
+npm run cbor2json -- --in sample.cbor --out output.json
+
+# Output to current directory (saves as <input-name>.json)
+npm run cbor2json -- --in sample.cbor
+
+# Format CBOR timestamps (tags 0, 1) as ISO 8601 strings
+npm run cbor2json -- --in sample.cbor --fd --tz UTC
+
+# Format timestamps in a specific timezone
+npm run cbor2json -- --in sample.cbor --fd --tz "-06:00"
+npm run cbor2json -- --in sample.cbor --fd --tz America/Mexico_City
+```
+
+After `npm link`, you can run the CLI globally:
+
+```bash
+cbor2json --in sample.cbor --out output.json
+```
+
+| Flag | Description |
+|------|-------------|
+| `--in <file>` | CBOR input file (required) |
+| `--out <file>` | JSON output file (optional; defaults to current directory with `.json` extension) |
+| `--fd` | Format CBOR timestamp tags (0, 1) as ISO 8601 strings |
+| `--tz <tz>` | Timezone for formatted dates (optional; defaults to UTC). Examples: `UTC`, `-06:00`, `+05:30`, `America/Mexico_City` |
 
 #### ✅ Installation Verification
 If `npm install` completed successfully, you should have:
@@ -150,6 +189,8 @@ npx serve -s build
 ## 📁 Project Architecture
 
 ```
+bin/
+└── cbor2json.js             # 🖥️ CLI executable for CBOR → JSON conversion
 src/
 ├── components/               # React components
 │   ├── FileUploadPanel.tsx   # 📤 Upload interface with drag & drop
@@ -164,11 +205,11 @@ src/
 │   ├── cborProcessor.ts      # 🔢 CBOR to JSON conversion
 │   └── editorConfig.ts       # ⚙️ CodeMirror configuration
 ├── constants/                # Application constants
-│   └── index.ts              # 📊 Shared constants and thresholds
-├── App.tsx                   # 🏠 Main application component
-├── App.css                   # 🎨 Global application styles
-├── index.tsx                 # 🚀 React application entry point
-└── index.css                 # 🌐 Global CSS reset and base styles
+│   └── index.ts             # 📊 Shared constants and thresholds
+├── App.tsx                  # 🏠 Main application component
+├── App.css                  # 🎨 Global application styles
+├── index.tsx               # 🚀 React application entry point
+└── index.css               # 🌐 Global CSS reset and base styles
 ```
 
 ## 🌍 Browser Compatibility
@@ -212,6 +253,9 @@ npm start          # Start development server
 npm test           # Run test suite
 npm run build      # Create production build
 npm run eject      # Eject from Create React App (irreversible)
+
+# CLI
+npm run cbor2json  # Convert CBOR to JSON (use with --in and --out flags)
 
 # Deployment
 npm run predeploy  # Build before deployment
@@ -271,26 +315,54 @@ We welcome contributions! Here's how you can help:
 - Fix typos or clarify instructions
 - Add examples or use cases
 
+## 📊 Performance Benchmarks
+
+- **🚀 Load Time**: <2s on 3G networks
+- **📱 Mobile Score**: 95+ Lighthouse performance
+- **♿ Accessibility**: WCAG 2.1 AA compliant
+- **📏 Bundle Size**: <200KB gzipped
+- **🔄 File Processing**: Handles files up to 50MB efficiently
+
+## 🛡️ Security & Privacy
+
+- **🔒 Client-Side Processing** - Files never leave your browser
+- **🚫 No Data Collection** - Zero tracking or analytics
+- **🔐 Secure File Handling** - Modern Web APIs with security best practices
+- **🛡️ Content Security Policy** - Protection against XSS attacks
+
 ## 📄 License
 
 This project is open source and available under the **[MIT License](LICENSE)**.
+
+```
+MIT License - feel free to use, modify, and distribute
+Commercial use, modification, and distribution permitted
+No warranty provided - use at your own risk
+```
 
 ## 🙏 Acknowledgments
 
 ### 🚀 Built With
 - **[cbor-js](https://www.npmjs.com/package/cbor-js)** - Browser-compatible CBOR decoding
 - **[CodeMirror 6](https://codemirror.net/)** - Professional code editing experience
-- **[React](https://reactjs.org/)**
+- **[React](https://reactjs.org/)** - UI library for building interactive interfaces
+- **[Create React App](https://create-react-app.dev/)** - Zero-config React build tooling
+
+### 👨‍💻 Created By
+**[apercova](https://github.com/apercova)** - Full Stack Developer
+
+[![GitHub](https://img.shields.io/badge/GitHub-apercova-black?logo=github)](https://github.com/apercova) [![Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Support-orange?logo=buy-me-a-coffee)](https://buymeacoffee.com/apercova)
 
 ---
 
 **⭐ Star this repo** if you found it helpful!
 
-**🍴 Fork and deploy** your own instance using our [deployment guide](docs/DEPLOY.md)
+**🍴 Fork and deploy** your own instance using our [deployment guide](DEPLOY.md)
 
 **🐛 Report issues** or **💡 suggest features** via [GitHub Issues](https://github.com/apercova/cbor_json/issues)
 
 ---
 
 **Version:** 1.0.0  
-**Last Updated:** September 2025
+**Last Updated:** March 2025  
+**Status:** Production Ready 🚀
