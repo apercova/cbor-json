@@ -1,13 +1,11 @@
 {
   "files": {
-    "main.css": "/cbor-json/static/css/main.35cb7a2e.css",
-    "main.js": "/cbor-json/static/js/main.70d0d66c.js",
-    "index.html": "/cbor-json/index.html",
-    "main.35cb7a2e.css.map": "/cbor-json/static/css/main.35cb7a2e.css.map",
-    "main.70d0d66c.js.map": "/cbor-json/static/js/main.70d0d66c.js.map"
+    "main.css": "/cbor-json/static/css/main.919c7e00.css",
+    "main.js": "/cbor-json/static/js/main.1e0f228c.js",
+    "index.html": "/cbor-json/index.html"
   },
   "entrypoints": [
-    "static/css/main.35cb7a2e.css",
-    "static/js/main.70d0d66c.js"
+    "static/css/main.919c7e00.css",
+    "static/js/main.1e0f228c.js"
   ]
 }
