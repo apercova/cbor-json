@@ -5,6 +5,7 @@ import CodeMirror from '@uiw/react-codemirror';
 import LoadingIndicator from './LoadingIndicator';
 import { createEditorExtensions, editorBasicSetup } from '../utils/editorConfig';
 import { LARGE_FILE_THRESHOLD, JSON_FORMATTING_DELAY } from '../constants';
+import { jsonDownloadName } from '../utils/downloadName';
 import './JsonDisplayPanel.css';
 
 interface JsonDisplayPanelProps {
@@ -48,8 +49,7 @@ const JsonDisplayPanel: React.FC<JsonDisplayPanelProps> = ({
   const handleSaveJson = () => {
     if (formattedJson) {
       const blob = new Blob([formattedJson], { type: 'application/json' });
-      const baseFileName = fileName.replace(/\.[^/.]+$/, ''); // Remove extension
-      saveAs(blob, `${baseFileName}.json`);
+      saveAs(blob, jsonDownloadName(fileName));
     }
   };
 

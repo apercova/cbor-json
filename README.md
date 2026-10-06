@@ -2,26 +2,27 @@
 
 A modern, responsive React application that converts CBOR (Concise Binary Object Representation) files to JSON with a beautiful, professional interface.
 
-![React](https://img.shields.io/badge/React-18.2.0-blue?logo=react) ![TypeScript](https://img.shields.io/badge/TypeScript-4.9.0-blue?logo=typescript) ![License](https://img.shields.io/badge/License-MIT-green) ![Build](https://img.shields.io/badge/Build-Passing-brightgreen)
+![React](https://img.shields.io/badge/React-18.2.0-blue?logo=react) ![TypeScript](https://img.shields.io/badge/TypeScript-4.9.0-blue?logo=typescript) ![License](https://img.shields.io/badge/License-MIT-green)
 
 ## ✨ Features
 
 ### 🎯 Core Functionality
-- **🖥️ CLI Tool**: Convert CBOR files to JSON from the command line with `--in` and `--out` flags
+- **🖥️ CLI Tool**: Convert CBOR files to JSON with required `--in`, optional `--out`, and overwrite protection
+- **📏 Input Limit**: Accepts CBOR files up to 100 MiB in both the browser and CLI
 - **🚀 Drag & Drop Interface**: Simply drag CBOR files onto the upload area
 - **📁 File Browser**: Click to browse and select CBOR files (.cbor, .bin)
 - **⚡ Live Conversion**: Real-time conversion from CBOR to JSON with loading indicators
 - **🔄 Quick File Switching**: "New" button for rapid file uploads without clearing current data
-- **💾 Save to Disk**: Download converted JSON files with original filenames
+- **💾 Save to Disk**: Download converted JSON files with sanitized filenames
 - **🧹 Smart Clear**: Reset to upload new files or return to upload interface
 
 ### 📝 Professional JSON Editor
 - **🎨 Syntax Highlighting**: Beautiful JSON display powered by CodeMirror 6
 - **📊 Line Numbers**: Easy navigation with line count display
 - **⚙️ Smart File Handling**: 
-  - Small files (<100KB): Fully editable with syntax highlighting
-  - Large files (>100KB): Optimized view-only mode for performance
-- **⚠️ Large File Warnings**: Clear indicators when files exceed editing threshold
+  - JSON up to 100,000 formatted characters: Editable with syntax highlighting
+  - JSON over 100,000 formatted characters: Uses the large-output editor configuration
+- **⚠️ Large Output Warnings**: Shown when formatted JSON exceeds 100,000 characters
 - **⌨️ Keyboard Shortcuts**: Standard editor shortcuts (Cmd+A, Escape, etc.)
 - **🔍 Code Folding**: Collapse JSON objects and arrays for better navigation
 
@@ -43,15 +44,15 @@ A modern, responsive React application that converts CBOR (Concise Binary Object
 
 ### Prerequisites
 
-- **Node.js** 16+ (recommended: latest LTS)
+- **Node.js** 16+ (recommended: current LTS)
 - **npm** 8+ or **yarn** 1.22+
 
 ### Installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/cbor_json.git
-cd cbor_json
+git clone https://github.com/apercova/cbor-json.git
+cd cbor-json
 
 # Install dependencies (this will install everything needed)
 npm install
@@ -63,7 +64,9 @@ npm run type-check
 npm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to view the app.
+Open [http://localhost:3000](http://localhost:3000) to view the app. The
+development server binds to `127.0.0.1` and is available only on the local
+machine by default.
 
 ### CLI Usage
 
@@ -82,7 +85,21 @@ npm run cbor2json -- --in sample.cbor --fd --tz UTC
 # Format timestamps in a specific timezone
 npm run cbor2json -- --in sample.cbor --fd --tz "-06:00"
 npm run cbor2json -- --in sample.cbor --fd --tz America/Mexico_City
+
+# Show all CLI options and the input size limit
+npm run cbor2json -- --help
+
+# Overwrite an existing output file
+npm run cbor2json -- --in sample.cbor --out output.json --force
+
+# Convert the included sample
+npm run cbor2json -- --in samples/small.cbor --out /tmp/small.json
 ```
+
+Inputs larger than 100 MiB are rejected before being read. Existing output
+files are preserved unless `--force` is supplied. The CLI reads and writes the
+paths you provide with your user permissions; it does not restrict writes to
+the current directory.
 
 After `npm link`, you can run the CLI globally:
 
@@ -96,6 +113,8 @@ cbor2json --in sample.cbor --out output.json
 | `--out <file>` | JSON output file (optional; defaults to current directory with `.json` extension) |
 | `--fd` | Format CBOR timestamp tags (0, 1) as ISO 8601 strings |
 | `--tz <tz>` | Timezone for formatted dates (optional; defaults to UTC). Examples: `UTC`, `-06:00`, `+05:30`, `America/Mexico_City` |
+| `--force` | Allow overwriting an existing output file |
+| `--help`, `-h` | Print CLI usage |
 
 #### ✅ Installation Verification
 If `npm install` completed successfully, you should have:
@@ -122,8 +141,9 @@ npx serve -s build
    - Visual feedback with drag-over effects
 
 2. **File Browser**: 
-   - Click anywhere in the upload area to open file selector
-   - Supports multiple file selection workflows
+   - Click the upload area to choose a file
+   - Select the same file again after a previous conversion if needed
+   - Files larger than 100 MiB are rejected before being read
 
 3. **Quick Upload**: 
    - Use "📁 New" button from JSON panel for rapid file switching
@@ -131,21 +151,19 @@ npx serve -s build
 
 ### 📋 Working with JSON Output
 
-- **📝 Small Files** (<100KB): 
+- **📝 Short JSON** (up to 100,000 formatted characters):
   - Fully editable with syntax highlighting
   - Copy, select all, and standard editor features
   
-- **👁️ Large Files** (>100KB): 
-  - Optimized view-only mode for smooth performance
-  - Virtual scrolling for handling massive datasets
+- **👁️ Longer JSON** (over 100,000 formatted characters):
+  - Displayed using the large-output editor configuration
   
 - **📊 File Information**: 
   - Line count displayed in header
   - File size warnings when applicable
   
 - **💾 Export Options**: 
-  - Save as `.json` file with automatic filename generation
-  - Preserves original filename structure
+  - Save as `.json` file with a sanitized filename based on the upload name
 
 ### 🔧 Advanced Features
 
@@ -163,7 +181,7 @@ npx serve -s build
 
 ### Core Framework
 - **⚛️ React** 18.2.0 - Modern React with hooks and concurrent features
-- **📘 TypeScript** 4.9.0 - Full type safety and IntelliSense
+- **📘 TypeScript** 4.9.0 - Static type checking and editor support
 - **🏗️ Create React App** 5.0.1 - Zero-config build tooling
 
 ### CBOR Processing
@@ -191,6 +209,13 @@ npx serve -s build
 ```
 bin/
 └── cbor2json.js             # 🖥️ CLI executable for CBOR → JSON conversion
+scripts/
+└── inject-csp.js            # 🛡️ Add and validate CSP in production HTML
+samples/
+└── small.cbor                # 📄 26-byte example CBOR file
+public/
+└── _headers                  # 🛡️ Netlify security response headers
+vercel.json                   # 🛡️ Vercel security response headers
 src/
 ├── components/               # React components
 │   ├── FileUploadPanel.tsx   # 📤 Upload interface with drag & drop
@@ -203,9 +228,11 @@ src/
 │   └── useFileHandler.ts     # 🔄 Reusable file processing logic
 ├── utils/                    # Utility functions
 │   ├── cborProcessor.ts      # 🔢 CBOR to JSON conversion
+│   ├── downloadName.ts       # 🧹 Safe JSON download filenames
 │   └── editorConfig.ts       # ⚙️ CodeMirror configuration
 ├── constants/                # Application constants
-│   └── index.ts             # 📊 Shared constants and thresholds
+│   ├── index.ts             # 📊 UI constants and thresholds
+│   └── limits.js            # 📏 Shared 100 MiB input limit
 ├── App.tsx                  # 🏠 Main application component
 ├── App.css                  # 🎨 Global application styles
 ├── index.tsx               # 🚀 React application entry point
@@ -234,14 +261,14 @@ src/
 
 ## 🚀 Deployment
 
-Ready to deploy your own instance? Check out our comprehensive **[Deployment Guide](DEPLOY.md)** with step-by-step instructions for:
+Ready to deploy your own instance? See the [deployment guide](docs/DEPLOY.md).
+Vercel and Netlify header configuration is included in this repository. GitHub
+Pages receives CSP and referrer meta policies, but cannot set all response
+headers.
 
-- 🚀 **Vercel** (Recommended)
+- 🚀 **Vercel**
 - 🌐 **Netlify**
 - 🐙 **GitHub Pages**
-- 🔥 **Firebase Hosting**
-- 🎨 **Render**
-- ⚡ **Surge.sh**
 
 ## 🔧 Development
 
@@ -250,12 +277,14 @@ Ready to deploy your own instance? Check out our comprehensive **[Deployment Gui
 ```bash
 # Development
 npm start          # Start development server
-npm test           # Run test suite
+npm test -- --watchAll=false  # Run tests once
+npm run type-check  # Check TypeScript
+npm run lint        # Lint source files
 npm run build      # Create production build
 npm run eject      # Eject from Create React App (irreversible)
 
 # CLI
-npm run cbor2json  # Convert CBOR to JSON (use with --in and --out flags)
+npm run cbor2json -- --help  # Show CLI options
 
 # Deployment
 npm run predeploy  # Build before deployment
@@ -264,19 +293,12 @@ npm run deploy     # Deploy to GitHub Pages
 
 ### 🧪 Code Quality Features
 
-- **📘 TypeScript** - Full type safety across the application
+- **📘 TypeScript** - Static type checking for the TypeScript application code
 - **🔍 ESLint** - Code linting with React and TypeScript rules
+- **🧪 Jest tests** - Input limits, download names, CLI safety, and CSP generation
 - **🎯 DRY Principles** - Reusable components, hooks, and utilities
 - **⚛️ Modern React Patterns** - Hooks, forwardRef, useImperativeHandle
 - **🏗️ Component Architecture** - Modular, maintainable code structure
-
-### 🚀 Performance Optimizations
-
-- **📊 Virtual Scrolling** - CodeMirror handles large JSON files efficiently
-- **⚡ Lazy Loading** - Components load only when needed
-- **🗜️ Optimized Builds** - Tree shaking and code splitting via CRA
-- **📏 Smart File Handling** - Different modes for small vs large files
-- **⚠️ User Feedback** - Clear indicators for file size and performance impact
 
 ### 🧪 Testing Production Build
 
@@ -285,8 +307,6 @@ npm run deploy     # Deploy to GitHub Pages
 npm run build
 npx serve -s build
 
-# Analyze bundle size
-npx webpack-bundle-analyzer build/static/js/*.js
 ```
 
 ## 🤝 Contributing
@@ -315,20 +335,20 @@ We welcome contributions! Here's how you can help:
 - Fix typos or clarify instructions
 - Add examples or use cases
 
-## 📊 Performance Benchmarks
+## 📏 File Size and Performance
 
-- **🚀 Load Time**: <2s on 3G networks
-- **📱 Mobile Score**: 95+ Lighthouse performance
-- **♿ Accessibility**: WCAG 2.1 AA compliant
-- **📏 Bundle Size**: <200KB gzipped
-- **🔄 File Processing**: Handles files up to 50MB efficiently
+The browser and CLI reject inputs larger than 100 MiB before reading them.
+This is an input limit, not a performance guarantee. Browser decoding and JSON
+formatting can use substantially more memory than the source CBOR file.
 
 ## 🛡️ Security & Privacy
 
 - **🔒 Client-Side Processing** - Files never leave your browser
 - **🚫 No Data Collection** - Zero tracking or analytics
 - **🔐 Secure File Handling** - Modern Web APIs with security best practices
-- **🛡️ Content Security Policy** - Protection against XSS attacks
+- **🛡️ Content Security Policy** - Production builds add a policy that blocks
+  inline scripts. Vercel and Netlify configurations also set CSP,
+  `Referrer-Policy`, and `X-Content-Type-Options: nosniff` response headers.
 
 ## 📄 License
 
@@ -357,12 +377,11 @@ No warranty provided - use at your own risk
 
 **⭐ Star this repo** if you found it helpful!
 
-**🍴 Fork and deploy** your own instance using our [deployment guide](DEPLOY.md)
+**🍴 Fork and deploy** your own instance using our [deployment guide](docs/DEPLOY.md)
 
-**🐛 Report issues** or **💡 suggest features** via [GitHub Issues](https://github.com/apercova/cbor_json/issues)
+**🐛 Report issues** or **💡 suggest features** via [GitHub Issues](https://github.com/apercova/cbor-json/issues)
 
 ---
 
 **Version:** 1.0.0  
-**Last Updated:** March 2025  
-**Status:** Production Ready 🚀
+**Last Updated:** October 2026

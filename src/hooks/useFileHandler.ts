@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import { processCborFile } from '../utils/cborProcessor';
 import { SUPPORTED_FILE_EXTENSIONS } from '../constants';
+import { fileTooLargeMessage } from '../constants/limits';
 
 interface UseFileHandlerProps {
   onCborConverted: (data: any, fileName: string) => void;
@@ -19,6 +20,14 @@ export const useFileHandler = ({
 
   const handleFile = async (file: File) => {
     if (onError) onError(''); // Clear previous errors
+
+    const tooLarge = fileTooLargeMessage(file.size);
+    if (tooLarge) {
+      if (onError) onError(tooLarge);
+      onFileProcessingError();
+      return;
+    }
+
     onFileProcessingStart();
 
     try {
@@ -37,9 +46,11 @@ export const useFileHandler = ({
   };
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      handleFile(files[0]);
+    const file = e.target.files && e.target.files.length > 0 ? e.target.files[0] : null;
+    // Reset after taking the File so the same path can be chosen again.
+    e.target.value = '';
+    if (file) {
+      handleFile(file);
     }
   };
 
