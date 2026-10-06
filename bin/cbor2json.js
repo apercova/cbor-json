@@ -2,10 +2,15 @@
 
 /**
  * CLI to convert CBOR files to JSON using cbor-js.
- * Usage: cbor2json --in <input.cbor> [--out <output.json>] [--fd] [--tz <timezone>]
+ * Usage: cbor2json --in <input.cbor> [--out <output.json>] [--force] [--fd] [--tz <timezone>]
+ *
+ * Paths are used as given. This process reads and writes those paths with
+ * the permissions of the user who runs it. It does not confine writes to
+ * the current directory.
  *
  * If --out is omitted, the output is saved to the current directory
- * with the input filename and .json extension.
+ * with the input filename and .json extension. An existing output file
+ * is left untouched unless --force is passed.
  *
  * --fd (format-date): Format CBOR timestamp tags (0, 1) as ISO 8601 strings
  * --tz <tz>: Timezone for formatted dates. Optional, defaults to UTC.
@@ -15,27 +20,91 @@
 const fs = require('fs');
 const path = require('path');
 const CBOR = require('cbor-js');
+const { fileTooLargeMessage, MAX_INPUT_BYTES } = require('../src/constants/limits');
 
-function parseArgs() {
-  const args = process.argv.slice(2);
-  let inFile = null;
-  let outFile = null;
-  let formatDate = false;
-  let timezone = 'UTC';
+const HELP = `Usage: cbor2json --in <input.cbor> [--out <output.json>] [--force] [--fd] [--tz <timezone>]
+
+Convert a CBOR file to JSON.
+
+Paths are used as given. The tool reads the input path and writes the output
+path with your user permissions. It does not confine writes to the current
+directory.
+
+The input must be a regular file of at most ${MAX_INPUT_BYTES} bytes (100 MiB).
+The size is checked before the file is read.
+
+Options:
+  --in <file>    CBOR input file (required)
+  --out <file>   JSON output file (optional; default is <input-name>.json in the
+                 current directory)
+  --force        Overwrite the output file if it already exists
+  --fd           Format CBOR timestamp tags (0, 1) as ISO 8601 strings
+  --tz <tz>      Timezone for formatted dates (default UTC).
+                 Examples: UTC, -06:00, +05:30, America/Mexico_City
+  --help, -h     Show this help
+
+Unknown flags are an error.
+`;
+
+function parseArgs(argv) {
+  const args = argv.slice(2);
+  const result = {
+    inFile: null,
+    outFile: null,
+    formatDate: false,
+    timezone: 'UTC',
+    force: false,
+    help: false,
+  };
 
   for (let i = 0; i < args.length; i++) {
-    if (args[i] === '--in' && args[i + 1]) {
-      inFile = args[++i];
-    } else if (args[i] === '--out' && args[i + 1]) {
-      outFile = args[++i];
-    } else if (args[i] === '--fd') {
-      formatDate = true;
-    } else if (args[i] === '--tz' && args[i + 1]) {
-      timezone = args[++i];
+    const arg = args[i];
+    if (arg === '--help' || arg === '-h') {
+      result.help = true;
+    } else if (arg === '--in') {
+      result.inFile = requireValue(args, i, '--in');
+      i++;
+    } else if (arg === '--out') {
+      result.outFile = requireValue(args, i, '--out');
+      i++;
+    } else if (arg === '--fd') {
+      result.formatDate = true;
+    } else if (arg === '--tz') {
+      result.timezone = requireValue(args, i, '--tz');
+      i++;
+    } else if (arg === '--force') {
+      result.force = true;
+    } else {
+      throw new Error(`Unknown argument: ${arg}`);
     }
   }
 
-  return { inFile, outFile, formatDate, timezone };
+  return result;
+}
+
+function requireValue(args, index, flag) {
+  if (index + 1 >= args.length) {
+    throw new Error(`${flag} requires a value`);
+  }
+  return args[index + 1];
+}
+
+/**
+ * Stat the input and refuse anything that should not be read.
+ * Returns an error message, or null when the file may be read.
+ * Does not read the file.
+ * @param {string} inputPath
+ * @returns {string | null}
+ */
+function rejectIfUnreadable(inputPath) {
+  if (!fs.existsSync(inputPath)) {
+    return `Input file not found: ${inputPath}`;
+  }
+  const stat = fs.statSync(inputPath);
+  if (!stat.isFile()) {
+    return `Input path is not a file: ${inputPath}`;
+  }
+  return fileTooLargeMessage(stat.size);
 }
 
 /**
@@ -172,22 +241,44 @@ function processCborToJson(inputPath, options = {}) {
   return JSON.parse(JSON.stringify(decodedData));
 }
 
-function main() {
-  const { inFile, outFile, formatDate, timezone } = parseArgs();
+function main(argv = process.argv) {
+  let parsed;
+  try {
+    parsed = parseArgs(argv);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Unknown error';
+    console.error(`Error: ${msg}`);
+    console.error('Run cbor2json --help for usage.');
+    process.exit(1);
+  }
+
+  if (parsed.help) {
+    console.log(HELP);
+    return;
+  }
+
+  const { inFile, outFile, formatDate, timezone, force } = parsed;
 
   if (!inFile) {
     console.error('Error: --in <file> is required');
+    console.error('Run cbor2json --help for usage.');
     process.exit(1);
   }
 
   const outputPath = outFile ?? deriveOutputPath(inFile);
+  const unreadable = rejectIfUnreadable(inFile);
+  if (unreadable) {
+    console.error(`Error: ${unreadable}`);
+    process.exit(1);
+  }
+
+  if (fs.existsSync(outputPath) && !force) {
+    console.error(`Error: Output file already exists: ${outputPath}`);
+    console.error('Pass --force to overwrite it. Paths are used as given.');
+    process.exit(1);
+  }
 
   try {
-    if (!fs.existsSync(inFile)) {
-      console.error(`Error: Input file not found: ${inFile}`);
-      process.exit(1);
-    }
-
     const jsonData = processCborToJson(inFile, { formatDate, timezone });
     const jsonString = JSON.stringify(jsonData, null, 2);
     fs.writeFileSync(outputPath, jsonString, 'utf8');
@@ -208,4 +299,8 @@ function main() {
   }
 }
 
-main();
+if (require.main === module) {
+  main();
+}
+
+module.exports = { parseArgs, rejectIfUnreadable, HELP, main };
