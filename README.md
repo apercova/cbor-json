@@ -137,7 +137,10 @@ cbor2json --in sample.cbor --out output.json
 - The Settings pane controls tag representation, timestamp formatting, large
   integer output, and non-string map-key handling. Global tag representation
   wraps every tag as `{ "$cbor": "tag", "tag": ..., "value": ... }` and
-  overrides the timestamp setting.
+  overrides the timestamp setting. An IANA timezone selector is available for
+  ISO output after enabling its searchable timezone picker; it defaults to UTC
+  and resets to UTC when the toggle or timestamp format changes. Epoch values
+  always remain the original instant.
 - Non-string map keys are coerced to strings by default for compatibility;
   collisions after coercion are rejected. Strict map-key mode rejects any
   non-string key. Duplicate string keys, undefined, non-finite floats, decimal

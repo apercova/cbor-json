@@ -1,4 +1,6 @@
 .settings-pane {
+  position: relative;
+  z-index: 2;
   flex: 0 0 auto;
   margin-bottom: 0.5rem;
   padding: 0.75rem 1rem;
@@ -73,6 +75,69 @@
 .setting-field select:disabled {
   background: #eef0f2;
   color: #626b75;
+}
+
+.timezone-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 1.25rem;
+  cursor: pointer;
+}
+
+.timezone-toggle input {
+  margin: 0;
+}
+
+.timezone-picker {
+  position: relative;
+}
+
+.timezone-picker input {
+  width: 100%;
+  min-height: 2rem;
+  box-sizing: border-box;
+  padding: 0.3rem 0.45rem;
+  border: 1px solid #cbd1d8;
+  border-radius: 4px;
+  background: #fff;
+  color: #222;
+  font: inherit;
+}
+
+.timezone-picker input:disabled {
+  background: #eef0f2;
+  color: #626b75;
+}
+
+.timezone-options {
+  position: absolute;
+  z-index: 3;
+  top: calc(100% + 2px);
+  right: 0;
+  left: 0;
+  max-height: 14rem;
+  overflow-y: auto;
+  border: 1px solid #b9c0c8;
+  border-radius: 4px;
+  background: #fff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.16);
+}
+
+.timezone-option,
+.timezone-empty {
+  padding: 0.4rem 0.55rem;
+  color: #222;
+  font-size: 0.8rem;
+}
+
+.timezone-option {
+  cursor: pointer;
+}
+
+.timezone-option:hover,
+.timezone-option.active {
+  background: #e8efff;
 }
 
 @media (max-width: 768px) {

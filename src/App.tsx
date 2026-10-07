@@ -6,7 +6,6 @@ import SettingsPane, { DecoderSettings } from './components/SettingsPane';
 
 function App() {
   const [jsonText, setJsonText] = useState<string | null>(null);
-  const [decodeWarnings, setDecodeWarnings] = useState<string[]>([]);
   const [decodeError, setDecodeError] = useState<string>('');
   const [fileName, setFileName] = useState<string>('');
   const [isProcessingFile, setIsProcessingFile] = useState<boolean>(false);
@@ -14,14 +13,16 @@ function App() {
   const [settings, setSettings] = useState<DecoderSettings>({
     preserveTags: false,
     timestampFormat: 'epoch',
+    timezoneEnabled: false,
+    timezone: 'UTC',
     largeIntegerMode: 'exact',
     strictMapKeys: false,
   });
   const fileUploadRef = useRef<FileUploadPanelRef>(null);
 
   const handleCborConverted = (convertedJson: string, warnings: string[], originalFileName: string) => {
+    if (warnings.length > 0) console.log('Decoded with warnings:', warnings);
     setJsonText(convertedJson);
-    setDecodeWarnings(warnings);
     setDecodeError('');
     setFileName(originalFileName);
     setIsProcessingFile(false);
@@ -30,7 +31,6 @@ function App() {
   const handleFileProcessingStart = () => {
     setIsProcessingFile(true);
     setJsonText(null);
-    setDecodeWarnings([]);
     setDecodeError('');
     setFileName('');
   };
@@ -41,7 +41,6 @@ function App() {
 
   const handleClearData = () => {
     setJsonText(null);
-    setDecodeWarnings([]);
     setDecodeError('');
     setFileName('');
     setIsProcessingFile(false);
@@ -49,7 +48,6 @@ function App() {
 
   const handleNewFile = () => {
     setJsonText(null);
-    setDecodeWarnings([]);
     setDecodeError('');
     setFileName('');
     setIsProcessingFile(false);
@@ -98,7 +96,6 @@ function App() {
           {(jsonText || decodeError) && !isProcessingFile && (
             <JsonDisplayPanel 
               jsonText={jsonText || ''}
-              warnings={decodeWarnings}
               error={decodeError}
               fileName={fileName}
               onClearData={handleClearData}

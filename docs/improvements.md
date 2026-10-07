@@ -48,7 +48,7 @@ CLI:     --in  → bin/cbor2json.js → decodeCbor.mjs (+ --fd / --tz) → write
 ```
 
 The UI uses the shared decoder's default epoch-second timestamp policy. Decoder
-errors have stable codes; warnings appear with the converted JSON and on CLI
+errors have stable codes; warnings are logged to the browser console and to CLI
 stderr.
 
 ## Remaining documentation gaps
@@ -161,9 +161,12 @@ describe this program.
   and it links demo hosts that are not this project.
 - State CBOR types the converter preserves, types it rewrites, and types it
   rejects.
-- [x] Add a settings pane toggle that preserves all tags as JSON tag objects;
-  it overrides timestamp formatting. Timestamp tags can otherwise be epoch
-  seconds (default) or ISO 8601 strings.
+- [x] Add settings for global tag preservation, timestamp formatting, and ISO
+  timezone selection. Global tag preservation wraps all tags and overrides
+  timestamp formatting; otherwise timestamps are epoch seconds (default) or
+  ISO 8601 strings. ISO timezone selection is separately enabled, searchable,
+  defaults to UTC, and resets to UTC when toggled or when timestamp format
+  changes.
 - [x] Add a settings pane toggle for map-key handling: coerce non-string keys
   to strings (default) or enable strict mode, which rejects those keys.
 - [x] Add a settings pane toggle for large integer output: exact decimal JSON

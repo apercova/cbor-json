@@ -10,7 +10,6 @@ import './JsonDisplayPanel.css';
 
 interface JsonDisplayPanelProps {
   jsonText: string;
-  warnings: string[];
   error: string;
   fileName: string;
   onClearData: () => void;
@@ -19,7 +18,6 @@ interface JsonDisplayPanelProps {
 
 const JsonDisplayPanel: React.FC<JsonDisplayPanelProps> = ({
   jsonText,
-  warnings,
   error,
   fileName, 
   onClearData,
@@ -110,13 +108,6 @@ const JsonDisplayPanel: React.FC<JsonDisplayPanelProps> = ({
         <LoadingIndicator 
           message='Rendering JSON output...'
         />
-      )}
-
-      {warnings.length > 0 && (
-        <div className="decode-warnings" role="status">
-          <strong>Decoded with warnings:</strong>
-          <ul>{warnings.map((warning, index) => <li key={`${index}-${warning}`}>{warning}</li>)}</ul>
-        </div>
       )}
 
       {error && (

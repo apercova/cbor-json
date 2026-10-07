@@ -9,14 +9,13 @@ jest.mock('../utils/editorConfig', () => ({
 }));
 const JsonDisplayPanel = require('./JsonDisplayPanel').default;
 
-it('renders decode errors beneath warnings', () => {
+it('renders decode errors without the former warning banner text', () => {
   const container = document.createElement('div');
   const root = createRoot(container);
 
   act(() => {
     root.render(React.createElement(JsonDisplayPanel, {
       jsonText: '',
-      warnings: ['A decoder warning'],
       error: 'A decoder error',
       fileName: 'sample.cbor',
       onClearData: () => undefined,
@@ -24,12 +23,9 @@ it('renders decode errors beneath warnings', () => {
     }));
   });
 
-  const warningPane = container.querySelector('.decode-warnings');
   const errorPane = container.querySelector('.decode-error');
-  expect(warningPane).not.toBeNull();
   expect(errorPane).not.toBeNull();
-  if (!warningPane || !errorPane) throw new Error('Expected both message panes to render.');
-  expect(warningPane.compareDocumentPosition(errorPane)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  expect(container.textContent).not.toContain('Decoded with warnings:');
   expect(errorPane?.getAttribute('role')).toBe('alert');
 
   act(() => root.unmount());
