@@ -1,44 +1,44 @@
 # Improvements
 
 Assessment of the application and its improvement backlog. P0 decoder
-correctness and P1 file-safety changes are implemented on this branch; P2–P4
-work remains open unless noted.
+correctness, P1 file-safety, P3 UI accessibility, and P4 documentation work are
+implemented on this branch. P2 engineering work remains open unless noted.
 
 Audit date: 2026-10-06. `npm audit` on the lockfile: 3 critical, 80 high,
 15 moderate, 5 low (103).
 
 ## Threat model
 
-The UI decodes in the browser and does not send the file anywhere.
-Outbound links are GitHub and Buy Me a Coffee only.
+The UI decodes in the browser and does not send the file to a server.
+Outbound links are GitHub and Buy Me a Coffee only. The CLI uses the local
+paths passed by its operator and their operating-system permissions.
 
-A malicious CBOR file can only hurt the person who opens it: tab freeze,
-memory growth, wrong JSON. The CLI reads and writes paths the operator
-passes. It is a local tool. Treat decoded output as untrusted data.
-Never merge it into config, HTML, or a shell command.
+A malicious CBOR file can cause resource use or incorrect output for the person
+who opens it. The CLI is a local tool. Treat decoded output as untrusted data;
+never merge it into config, HTML, or a shell command.
 
-Most npm advisories are inside Create React App's dev server, Jest, and
-SVGO. They do not ship in the static `build/` the site serves. Fix them
-by leaving CRA, not by `npm audit fix --force`.
+The lockfile audit result is recorded above for its audit date. Recheck it with
+`npm audit`; do not assume advisories are excluded from the deployed bundle
+without checking the dependency tree. Avoid `npm audit fix --force`.
 
 ## Inventory
 
 | Path | Role | Notes |
 | --- | --- | --- |
-| `src/index.tsx` | CRA entry | StrictMode only. No error boundary. |
+| `src/index.tsx` | CRA entry | StrictMode wrapped in a render error boundary. |
 | `src/App.tsx` | Screen switch | Upload panel or JSON panel, plus decoder settings for tag, timestamp, large integer, and map-key handling. |
-| `src/components/FileUploadPanel.tsx` | Drop/click upload | Clickable `div`. No keyboard path. Hidden file input. |
+| `src/components/FileUploadPanel.tsx` | Drop/file-picker upload | Drag-and-drop target plus keyboard-accessible button opening the hidden file input. |
 | `src/hooks/useFileHandler.ts` | File input wiring | Rejects files over 100 MiB before `arrayBuffer()` and resets the input after selection. No extension check. |
 | `src/utils/cborProcessor.ts` | Browser decode | Reads the file and transfers its buffer to a Web Worker. |
 | `src/utils/decodeCbor.mjs` | Shared decoder | `cborg`, bounded depth, JSON conversion policy, stable errors, and date-tag formatting used by browser worker and CLI. |
 | `src/components/JsonDisplayPanel.tsx` | CodeMirror view + save | "Large file" means formatted string length > 100000, not file bytes. |
-| `src/utils/editorConfig.ts` | Editor setup | Escape shortcut does nothing. Imports `@codemirror/state`, which is not a direct dependency. |
-| `src/constants/index.ts` | Three constants | Threshold comment says 100KB. The value is a character count. |
+| `src/utils/editorConfig.ts` | Editor setup | Escape collapses the selection. Imports `@codemirror/state`, which is not a direct dependency. |
+| `src/constants/index.ts` | UI constants | Large-output threshold is 100,000 formatted JSON characters. |
 | `bin/cbor2json.js` | CLI | Uses the shared decoder with epoch-second timestamp numbers by default and optional ISO output with `--fd` / `--tz`; includes a 100 MiB pre-read size check, required `--in`, strict flags, `--help`, and guarded overwrites. |
-| `public/index.html` | Shell | References `favicon.ico`, which is not in `public/`. Production CSP is injected at build time; host header files set CSP, Referrer-Policy, and X-Content-Type-Options. |
+| `public/index.html` | Shell | References the included SVG favicon. Production CSP is injected at build time; host header files set CSP, Referrer-Policy, and X-Content-Type-Options. |
 | `fixtures/rfc8949-appendix-a.json` | Decoder fixtures | RFC 8949 Appendix A byte vectors and expected JSON values. |
-| `docs/DEPLOY.md` | Host guide | Repo name `cbor_json`, missing `CONTRIBUTING.md`, demo URLs, service worker that does not exist. |
-| Tests, CI | Partial / absent | RFC vector, decoder policy, P1 safety, and CSP metadata tests exist. There is no CI. |
+| `docs/DEPLOY.md` | Host guide | Concise instructions for the configured GitHub Pages, Vercel, and Netlify options. |
+| Tests, CI | Tests present; no CI | RFC vectors, decoder policy, UI behavior, file safety, CLI safety, and CSP metadata tests exist. |
 
 The browser and CLI use one decoder:
 
@@ -53,17 +53,16 @@ stderr.
 
 ## Remaining documentation gaps
 
-- WCAG 2.1 AA conformance has not been established. The upload target is a
-  clickable `div` and the file input is visually hidden.
+- WCAG 2.1 AA conformance has not been established; the implemented accessibility
+  behaviors do not amount to a conformance audit.
 - Components are not lazy-loaded; `App.tsx` imports both panels statically.
-- `docs/DEPLOY.md` still contains stale host instructions, service-worker
-  directions, and repository links. The README links to the correct path.
+- There is no CI workflow. Run the documented local checks before merging.
 
 ## P0 — Decoder correctness (implemented on this branch)
 
 `cborg` replaces `cbor-js` behind the shared `decodeCbor(bytes, options)`
 function. The decoder copies input bytes, preflights nesting (maximum 128),
-and enforces the shared 100 MiB limit. It rejects duplicate map keys,
+and enforces the shared 100 MiB limit. By default it rejects duplicate map keys,
 including collisions after non-string-key coercion, undefined,
 non-finite numbers, decimal/bigfloat tags, and unknown tags. Non-string map
 keys are coerced to strings by default for compatibility; strict mode rejects
@@ -111,10 +110,11 @@ P1 implementation files include `src/constants/limits.js`,
 checked for inline scripts before the CSP is inserted. The CSP permits inline
 styles for the current input styling and CodeMirror behavior.
 
-## P2 — Engineering hygiene
+## P2 — Engineering hygiene (open)
 
-- Tests: decoder vectors and CLI safety coverage exist. Add the planned UI
-  error-render test and CI.
+- [x] Add a UI render-error test. Decoder vectors, UI behavior, and CLI safety
+  coverage exist.
+- Add CI.
 - CI on pull request: `npm ci`, `npm run type-check`, `npm run lint`,
   `npm test`. Node 22.
 - `engines` says `node >= 16`. Node 16 and 18 are end of life. Set `>=22`.
@@ -123,11 +123,11 @@ styles for the current input styling and CodeMirror behavior.
   through a transitive package.
 - Finish replacing remaining application `any` types with the JSON output
   type.
-- `tsconfig` `target: es5` fights the browsers listed in the README
-  (Chrome 88+). Raising it is a build change. Do it with the toolchain move.
+- `tsconfig` `target: es5` is older than the configured build targets. Review
+  it as part of the toolchain move.
 - Plan the move off Create React App. `react-scripts@5` is unmaintained and
-  is why the audit is 103 items deep. Vite (or another current bundler) is
-  the remediation. Keep the component tree. Do not eject.
+  currently contributes legacy build tooling. Evaluate a current bundler such
+  as Vite while keeping the component tree. Do not eject.
 
 ## P3 — UI behavior and accessibility
 
@@ -143,20 +143,17 @@ styles for the current input styling and CodeMirror behavior.
 - [x] A React error boundary provides a recovery message for render errors.
 - [x] `public/index.html` references the included SVG favicon.
 
-## P4 — Docs
+## P4 — Docs (implemented)
 
-Rewrite the security, performance, and architecture sections after P0 so they
-describe this program.
-
-- Fix the repo name `cbor_json` → `cbor-json` in README and `docs/DEPLOY.md`.
-- Point the deployment link at `docs/DEPLOY.md`.
-- Remove the CSP, WCAG, lazy-loading, virtual-scrolling, 50MB, and Lighthouse
-  claims, or replace them with a command someone can re-run.
-- Cut `docs/DEPLOY.md` down to the hosts you actually use. It tells people to
-  register a service worker and a `CONTRIBUTING.md` that are not in the repo,
-  and it links demo hosts that are not this project.
-- State CBOR types the converter preserves, types it rewrites, and types it
-  rejects.
+- [x] Align repository names, deployment links, and host instructions with the
+  current repository configuration.
+- [x] Describe the security model, production CSP, file-size/runtime behavior,
+  browser/CLI architecture, and actual deployment options without unsupported
+  performance or conformance claims.
+- [x] Document which CBOR types are emitted directly, rewritten, preserved as
+  tagged objects, or rejected.
+- [x] Document all settings, defaults, precedence, and reset behavior in the
+  README.
 - [x] Add settings for global tag preservation, timestamp formatting, and ISO
   timezone selection. Global tag preservation wraps all tags and overrides
   timestamp formatting; otherwise timestamps are epoch seconds (default) or
@@ -175,15 +172,14 @@ describe this program.
 2. [x] Wire UI and CLI through the decoder, run browser decoding in a worker,
    and remove unused Python/legacy decoder dependencies.
 3. CI and remaining type cleanup.
-4. Accessibility and file-dialog behavior.
+4. [x] Accessibility and file-dialog behavior.
 5. Leave Create React App. Re-run `npm audit` and keep the production
    dependency set separate from the dev-server set.
-6. Trim `docs/DEPLOY.md` and finish documentation cleanup.
+6. [x] Trim `docs/DEPLOY.md` and finish documentation cleanup.
 
 ## Do not do in the first pass
 
 - `npm audit fix --force` or `npm run eject`.
-- A redesign, dark mode, PWA, i18n, or analytics. The deploy guide lists
-  these. They are new product scope.
+- A redesign, dark mode, PWA, i18n, or analytics. These are new product scope.
 - A backend for decoding. A server that accepts CBOR would expand the threat
   model to everyone on the internet.

@@ -1,6 +1,14 @@
 # Changelog
 
 2026-10-06:
+Completed the P4 documentation backlog.
+
+- Rewrote the deployment guide for the repository's GitHub Pages, Vercel, and Netlify configurations.
+- Updated README security, runtime, browser requirement, architecture, and CBOR conversion documentation.
+- Documented every decoder setting, its default, behavior, and precedence.
+- Corrected stale repository, deployment, upload, editor, browser-support, and architecture details; marked P4 complete.
+
+2026-10-06:
 Completed the P3 UI accessibility and resilience backlog.
 
 - Added a keyboard accessible file picker button and open the file dialog directly from the Open file action.
@@ -29,5 +37,5 @@ Improved file handling and security across the browser app and CLI.
 - Sanitized downloaded JSON filenames and reset the file input after selection.
 - Hardened the CLI with required `--in`, strict flag validation, `--help`, and overwrite protection via `--force`.
 - Added production CSP and host security headers, disabled production source maps, and bound the development server to localhost.
-- Added safety tests and a 26-byte CBOR sample at `samples/small.cbor`.
+- Added safety tests and a 37-byte CBOR sample at `samples/small.cbor`.
 - Updated the improvement assessment and Claude rules for implemented safeguards and testing expectations.

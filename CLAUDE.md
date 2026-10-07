@@ -31,10 +31,10 @@ bin/cbor2json.js          CLI using the shared decoder
 src/utils/cborProcessor.ts  file-to-worker wiring
 src/utils/cbor.worker.ts    browser decode worker
 src/utils/decodeCbor.mjs    shared CBOR-to-JSON decoder
-src/components/           upload panel, JSON panel, loading indicator
+src/components/             upload, JSON, settings, help, and error-boundary UI
 src/hooks/useFileHandler.ts
 docs/improvements.md      assessment and backlog
-docs/DEPLOY.md            hosting notes (partially stale)
+docs/DEPLOY.md            deployment instructions for configured static hosts
 ```
 
 ## Checks
