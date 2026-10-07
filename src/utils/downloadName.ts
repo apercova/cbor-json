@@ -5,6 +5,14 @@
 export function jsonDownloadName(fileName: string): string {
   const leaf = fileName.split(/[/\\]/).filter((part) => part.length > 0).pop() ?? '';
   const noExt = leaf.replace(/\.[^./\\]+$/, '');
-  const cleaned = noExt.replace(/\.\./g, '').replace(/[\u0000-\u001f\u007f]/g, '').trim();
+  const cleaned = noExt
+    .replace(/\.\./g, '')
+    .split('')
+    .filter((character) => {
+      const code = character.charCodeAt(0);
+      return code > 0x1f && code !== 0x7f;
+    })
+    .join('')
+    .trim();
   return `${cleaned.length > 0 ? cleaned : 'converted'}.json`;
 }

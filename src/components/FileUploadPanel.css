@@ -76,74 +76,6 @@
 
 
 
-.library-references {
-  margin-top: auto;
-  padding: 1rem;
-  background: #f8f9fa;
-  border-radius: 8px;
-  border: 1px solid #e9ecef;
-  flex-shrink: 0;
-}
-
-.library-references h4 {
-  margin: 0 0 0.75rem 0;
-  font-size: 0.9rem;
-  color: #495057;
-  font-weight: 600;
-}
-
-.library-links {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.library-item {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.library-item strong {
-  display: inline;
-  font-size: 0.85rem;
-  color: #495057;
-  font-weight: 500;
-}
-
-.library-item a {
-  display: inline;
-  margin-left: 0.25rem;
-  color: #007bff;
-  text-decoration: none;
-  font-size: 0.85rem;
-  font-weight: 500;
-  transition: color 0.2s ease;
-}
-
-.library-item a:hover {
-  color: #0056b3;
-  text-decoration: underline;
-}
-
-.library-description {
-  font-size: 0.8rem;
-  color: #6c757d;
-  font-style: italic;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .library-references {
-    margin-top: 1.5rem;
-    padding: 0.75rem;
-  }
-  
-  .library-links {
-    gap: 0.5rem;
-  }
-}
-
 .processing-state p {
   margin: 0;
   color: #667eea;
@@ -168,28 +100,6 @@
 .file-details {
   flex: 1;
   text-align: left;
-}
-
-.error-message {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  background: #fff5f5;
-  padding: 0.75rem;
-  border-radius: 6px;
-  border-left: 3px solid #dc3545;
-  margin-bottom: 1rem;
-}
-
-.error-icon {
-  font-size: 1.5rem;
-}
-
-.error-text {
-  flex: 1;
-  text-align: left;
-  color: #721c24;
-  font-weight: 500;
 }
 
 .upload-instructions {

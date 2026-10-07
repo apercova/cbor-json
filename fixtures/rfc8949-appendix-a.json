@@ -1,0 +1,14 @@
+[
+  { "name": "unsigned integer 0", "hex": "00", "json": "0" },
+  { "name": "unsigned integer 24", "hex": "1818", "json": "24" },
+  { "name": "unsigned integer 1000", "hex": "1903e8", "json": "1000" },
+  { "name": "negative integer -1", "hex": "20", "json": "-1" },
+  { "name": "byte string", "hex": "4401020304", "json": "{\"$cbor\":\"bytes\",\"base64\":\"AQIDBA==\"}" },
+  { "name": "text string", "hex": "6449455446", "json": "\"IETF\"" },
+  { "name": "array", "hex": "83010203", "json": "[\n  1,\n  2,\n  3\n]" },
+  { "name": "map", "hex": "a26161016162820203", "json": "{\n  \"a\": 1,\n  \"b\": [\n    2,\n    3\n  ]\n}" },
+  { "name": "false", "hex": "f4", "json": "false" },
+  { "name": "true", "hex": "f5", "json": "true" },
+  { "name": "null", "hex": "f6", "json": "null" },
+  { "name": "float 1.1", "hex": "fb3ff199999999999a", "json": "1.1" }
+]

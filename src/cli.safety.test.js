@@ -47,10 +47,39 @@ describe('cbor2json safety', () => {
   it('accepts a timezone that starts with a dash', () => {
     const input = path.join(dir, 'in.cbor');
     const output = path.join(dir, 'out.json');
-    fs.writeFileSync(input, Buffer.from([0xa0]));
+    fs.writeFileSync(input, Buffer.from([0xc1, 0x00]));
     const result = run(['--in', input, '--out', output, '--fd', '--tz', '-06:00']);
     expect(result.status).toBe(0);
-    expect(fs.readFileSync(output, 'utf8')).toMatch(/\{\s*\}/);
+    expect(JSON.parse(fs.readFileSync(output, 'utf8'))).toBe('1969-12-31T18:00:00.000-06:00');
+  });
+
+  it('writes timestamps as epoch seconds by default', () => {
+    const input = path.join(dir, 'timestamp-epoch.cbor');
+    const output = path.join(dir, 'timestamp-epoch.json');
+    fs.writeFileSync(input, Buffer.from('c1fb41d8d3af8e327efa', 'hex'));
+    const result = run(['--in', input, '--out', output]);
+    expect(result.status).toBe(0);
+    expect(JSON.parse(fs.readFileSync(output, 'utf8'))).toBe(1666104888.789);
+  });
+
+  it('encodes byte strings explicitly and reports a warning on stderr', () => {
+    const input = path.join(dir, 'bytes.cbor');
+    const output = path.join(dir, 'bytes.json');
+    fs.writeFileSync(input, Buffer.from([0x41, 0xff]));
+    const result = run(['--in', input, '--out', output]);
+    expect(result.status).toBe(0);
+    expect(JSON.parse(fs.readFileSync(output, 'utf8'))).toEqual({ $cbor: 'bytes', base64: '/w==' });
+    expect(result.stderr).toMatch(/Warning: A CBOR byte string was represented as base64/);
+  });
+
+  it('rejects an invalid timezone instead of silently formatting as UTC', () => {
+    const input = path.join(dir, 'timestamp.cbor');
+    const output = path.join(dir, 'timestamp.json');
+    fs.writeFileSync(input, Buffer.from([0xc1, 0x00]));
+    const result = run(['--in', input, '--out', output, '--fd', '--tz', 'Mars/Olympus']);
+    expect(result.status).toBe(1);
+    expect(result.stderr).toMatch(/INVALID_TIMEZONE: Unknown timezone/);
+    expect(fs.existsSync(output)).toBe(false);
   });
 
   it('refuses to overwrite unless --force is set', () => {

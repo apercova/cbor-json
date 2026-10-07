@@ -1,12 +1,15 @@
 import React, { useState, useImperativeHandle, forwardRef } from 'react';
 import LoadingIndicator from './LoadingIndicator';
 import { useFileHandler } from '../hooks/useFileHandler';
+import type { DecodeCborOptions } from '../utils/decodeCbor.mjs';
 import './FileUploadPanel.css';
 
 interface FileUploadPanelProps {
-  onCborConverted: (data: any, fileName: string) => void;
+  onCborConverted: (jsonText: string, warnings: string[], fileName: string) => void;
   onFileProcessingStart: () => void;
   onFileProcessingError: () => void;
+  onError: (error: string) => void;
+  decodeOptions: DecodeCborOptions;
   isProcessing?: boolean;
 }
 
@@ -14,16 +17,16 @@ export interface FileUploadPanelRef {
   openFileDialog: () => void;
 }
 
-const FileUploadPanel = forwardRef<FileUploadPanelRef, FileUploadPanelProps>(({ onCborConverted, onFileProcessingStart, onFileProcessingError, isProcessing = false }, ref) => {
+const FileUploadPanel = forwardRef<FileUploadPanelRef, FileUploadPanelProps>(({ onCborConverted, onFileProcessingStart, onFileProcessingError, onError, decodeOptions, isProcessing = false }, ref) => {
   const [isDragOver, setIsDragOver] = useState(false);
-  const [error, setError] = useState<string>('');
   const [uploadedFileName, setUploadedFileName] = useState<string>('');
   
   const { handleFile, fileInputProps, openFileDialog } = useFileHandler({
     onCborConverted,
     onFileProcessingStart,
     onFileProcessingError,
-    onError: setError
+    onError,
+    decodeOptions
   });
 
   // Expose openFileDialog to parent components
@@ -91,27 +94,6 @@ const FileUploadPanel = forwardRef<FileUploadPanelRef, FileUploadPanelProps>(({ 
           </div>
         </div>
       )}
-
-      {error && (
-        <div className="error-message">
-          <div className="error-icon">⚠️</div>
-          <div className="error-text">{error}</div>
-        </div>
-      )}
-
-      <div className="library-references">
-        <h4>Powered by:</h4>
-        <div className="library-links">
-          <div className="library-item">
-            <span><strong>CBOR Processing:</strong> <a href="https://www.npmjs.com/package/cbor-js" target="_blank" rel="noopener noreferrer">cbor-js</a></span>
-            <span className="library-description">Browser-compatible CBOR decoding</span>
-          </div>
-          <div className="library-item">
-            <span><strong>Code Editor:</strong> <a href="https://codemirror.net/" target="_blank" rel="noopener noreferrer">CodeMirror 6</a></span>
-            <span className="library-description">Professional code editing with JSON support</span>
-          </div>
-        </div>
-      </div>
     </div>
   );
 });

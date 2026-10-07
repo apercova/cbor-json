@@ -1,23 +1,50 @@
 import React, { useState, useRef } from 'react';
+import { saveAs } from 'file-saver';
 import './App.css';
 import FileUploadPanel, { FileUploadPanelRef } from './components/FileUploadPanel';
 import JsonDisplayPanel from './components/JsonDisplayPanel';
+import SettingsPane, { DecoderSettings } from './components/SettingsPane';
+import HelpPane from './components/HelpPane';
+import { jsonDownloadName } from './utils/downloadName';
+import type { DecodeCborOptions } from './utils/decodeCbor.mjs';
+
+type HeaderPane = 'settings' | 'help' | null;
 
 function App() {
-  const [jsonData, setJsonData] = useState<any>(null);
+  const [jsonText, setJsonText] = useState<string | null>(null);
+  const [decodeError, setDecodeError] = useState<string>('');
   const [fileName, setFileName] = useState<string>('');
   const [isProcessingFile, setIsProcessingFile] = useState<boolean>(false);
+  const [openHeaderPane, setOpenHeaderPane] = useState<HeaderPane>(null);
+  const [settings, setSettings] = useState<DecoderSettings>({
+    preserveTags: false,
+    timestampFormat: 'epoch',
+    timezoneEnabled: false,
+    timezone: 'UTC',
+    largeIntegerMode: 'exact',
+    strictMapKeys: false,
+  });
+  const decodeOptions: DecodeCborOptions = {
+    preserveTags: settings.preserveTags,
+    timestampFormat: settings.timestampFormat,
+    timezone: settings.timezoneEnabled ? settings.timezone : 'UTC',
+    largeIntegerMode: settings.largeIntegerMode,
+    strictMapKeys: settings.strictMapKeys,
+  };
   const fileUploadRef = useRef<FileUploadPanelRef>(null);
 
-  const handleCborConverted = (convertedData: any, originalFileName: string) => {
-    setJsonData(convertedData);
+  const handleCborConverted = (convertedJson: string, warnings: string[], originalFileName: string) => {
+    if (warnings.length > 0) console.log('Decoded with warnings:', warnings);
+    setJsonText(convertedJson);
+    setDecodeError('');
     setFileName(originalFileName);
     setIsProcessingFile(false);
   };
 
   const handleFileProcessingStart = () => {
     setIsProcessingFile(true);
-    setJsonData(null);
+    setJsonText(null);
+    setDecodeError('');
     setFileName('');
   };
 
@@ -25,16 +52,23 @@ function App() {
     setIsProcessingFile(false);
   };
 
-  const handleClearData = () => {
-    setJsonData(null);
+  const clearData = () => {
+    setJsonText(null);
+    setDecodeError('');
     setFileName('');
     setIsProcessingFile(false);
   };
 
+  const handleClearData = clearData;
+
+  const handleSaveJson = () => {
+    if (!jsonText) return;
+    const blob = new Blob([jsonText], { type: 'application/json' });
+    saveAs(blob, jsonDownloadName(fileName));
+  };
+
   const handleNewFile = () => {
-    setJsonData(null);
-    setFileName('');
-    setIsProcessingFile(false);
+    clearData();
     // Directly call the file dialog when upload panel is shown
     setTimeout(() => {
       fileUploadRef.current?.openFileDialog();
@@ -48,29 +82,88 @@ function App() {
           <div className="title-section">
             <h1>CBOR to JSON Converter</h1>
           </div>
+          <div className="header-controls">
+            {jsonText && (
+              <button
+                className="header-icon-button"
+                type="button"
+                aria-label="Save JSON"
+                title="Save to disk"
+                onClick={handleSaveJson}
+              >
+                💾
+              </button>
+            )}
+            <button
+              className="header-icon-button"
+              type="button"
+              aria-label="Open file"
+              title="Open file"
+              disabled={isProcessingFile}
+              onClick={handleNewFile}
+            >
+              📁
+            </button>
+            {(jsonText || isProcessingFile) && (
+              <button
+                className="header-icon-button"
+                type="button"
+                aria-label="Clear output"
+                title="Close editor"
+                disabled={!jsonText || isProcessingFile}
+                onClick={handleClearData}
+              >
+                ✖
+              </button>
+            )}
+            <button
+              className="header-icon-button"
+              type="button"
+              aria-label="Settings"
+              title="Settings"
+              aria-expanded={openHeaderPane === 'settings'}
+              aria-controls="decoder-settings"
+              onClick={() => setOpenHeaderPane((current) => current === 'settings' ? null : 'settings')}
+            >
+              ⚙
+            </button>
+            <button
+              className="header-icon-button"
+              type="button"
+              aria-label="Help and attribution"
+              aria-expanded={openHeaderPane === 'help'}
+              aria-controls="converter-help"
+              title="Help and attribution"
+              onClick={() => setOpenHeaderPane((current) => current === 'help' ? null : 'help')}
+            >
+              ?
+            </button>
+          </div>
         </div>
       </header>
       
       <div className="main-container">
+        {openHeaderPane === 'settings' && <SettingsPane settings={settings} onChange={setSettings} />}
+        {openHeaderPane === 'help' && <HelpPane />}
         <div className="panel-container">
           {/* Show upload panel when no data or processing */}
-          {(!jsonData || isProcessingFile) && (
+          {((!jsonText && !decodeError) || isProcessingFile) && (
             <FileUploadPanel 
               ref={fileUploadRef}
               onCborConverted={handleCborConverted}
               onFileProcessingStart={handleFileProcessingStart}
               onFileProcessingError={handleFileProcessingError}
+              onError={setDecodeError}
+              decodeOptions={decodeOptions}
               isProcessing={isProcessingFile}
             />
           )}
           
-          {/* Show JSON panel only when data is available (after successful processing) */}
-          {jsonData && !isProcessingFile && (
+          {/* Show the result panel for decoded JSON or a decode error. */}
+          {(jsonText || decodeError) && !isProcessingFile && (
             <JsonDisplayPanel 
-              jsonData={jsonData} 
-              fileName={fileName}
-              onClearData={handleClearData}
-              onNewFile={handleNewFile}
+              jsonText={jsonText || ''}
+              error={decodeError}
             />
           )}
         </div>

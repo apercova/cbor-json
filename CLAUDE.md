@@ -8,11 +8,11 @@ on the machine that has the file. The browser app does not upload it.
 - Do not add network calls, analytics, or a server that accepts CBOR.
 - The decoder is the product. The UI and the CLI call one function. Do not
   patch `src/utils/cborProcessor.ts` and `bin/cbor2json.js` separately.
+- The shared decoder enforces a 100 MiB input cap and 128-level nesting limit.
 - Decoded data is untrusted. Render it as text. Do not merge it into objects,
   HTML, or shell commands.
 - Do not claim tests, CSP, accessibility, bundle size, or benchmarks unless
   a command in this repo produces that result.
-- `requirements.txt` is not the runtime. The app is Node and the browser.
 
 ## How to change the code
 
@@ -27,8 +27,10 @@ on the machine that has the file. The browser app does not upload it.
 ## Layout
 
 ```
-bin/cbor2json.js          CLI
-src/utils/cborProcessor.ts  browser decode
+bin/cbor2json.js          CLI using the shared decoder
+src/utils/cborProcessor.ts  file-to-worker wiring
+src/utils/cbor.worker.ts    browser decode worker
+src/utils/decodeCbor.mjs    shared CBOR-to-JSON decoder
 src/components/           upload panel, JSON panel, loading indicator
 src/hooks/useFileHandler.ts
 docs/improvements.md      assessment and backlog
@@ -40,7 +42,7 @@ docs/DEPLOY.md            hosting notes (partially stale)
 ```bash
 npm run type-check
 npm run lint
-npm test -- --watchAll=false
+npm test
 ```
 
 There is no CI yet. Run the checks that the change can affect.

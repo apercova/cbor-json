@@ -1,39 +1,32 @@
 import React, { useState, useEffect } from 'react';
-import { saveAs } from 'file-saver';
 import CodeMirror from '@uiw/react-codemirror';
 
 import LoadingIndicator from './LoadingIndicator';
 import { createEditorExtensions, editorBasicSetup } from '../utils/editorConfig';
 import { LARGE_FILE_THRESHOLD, JSON_FORMATTING_DELAY } from '../constants';
-import { jsonDownloadName } from '../utils/downloadName';
 import './JsonDisplayPanel.css';
 
 interface JsonDisplayPanelProps {
-  jsonData: any;
-  fileName: string;
-  onClearData: () => void;
-  onNewFile: () => void;
+  jsonText: string;
+  error: string;
 }
 
-const JsonDisplayPanel: React.FC<JsonDisplayPanelProps> = ({ 
-  jsonData, 
-  fileName, 
-  onClearData,
-  onNewFile
+const JsonDisplayPanel: React.FC<JsonDisplayPanelProps> = ({
+  jsonText,
+  error,
 }) => {
   const [formattedJson, setFormattedJson] = useState<string>('');
   const [isRenderingJson, setIsRenderingJson] = useState<boolean>(false);
 
   useEffect(() => {
-    if (jsonData) {
+    if (jsonText) {
       setIsRenderingJson(true);
       setFormattedJson('');
       
       // Use setTimeout to allow UI update for large files
       setTimeout(() => {
         try {
-          const formatted = JSON.stringify(jsonData, null, 2);
-          setFormattedJson(formatted);
+          setFormattedJson(jsonText);
         } catch (error) {
           setFormattedJson('Error formatting JSON data');
         } finally {
@@ -44,18 +37,7 @@ const JsonDisplayPanel: React.FC<JsonDisplayPanelProps> = ({
       setFormattedJson('');
       setIsRenderingJson(false);
     }
-  }, [jsonData]);
-
-  const handleSaveJson = () => {
-    if (formattedJson) {
-      const blob = new Blob([formattedJson], { type: 'application/json' });
-      saveAs(blob, jsonDownloadName(fileName));
-    }
-  };
-
-
-
-
+  }, [jsonText]);
 
   const isLargeFile = formattedJson.length > LARGE_FILE_THRESHOLD;
   const extensions = createEditorExtensions(isLargeFile);
@@ -64,7 +46,7 @@ const JsonDisplayPanel: React.FC<JsonDisplayPanelProps> = ({
     <div className="panel">
       <div className="panel-header">
         <div className="header-left">
-          <h2>📄 JSON Output</h2>
+          <h2>{error && !jsonText ? '⚠️ CBOR Decode Error' : '📄 JSON Output'}</h2>
           {formattedJson && (
             <div className="line-counter">
               <span className="line-count">{formattedJson.split('\n').length.toLocaleString()} lines</span>
@@ -76,31 +58,6 @@ const JsonDisplayPanel: React.FC<JsonDisplayPanelProps> = ({
             </div>
           )}
         </div>
-        {jsonData && (
-          <div className="panel-actions">
-            <button 
-              className="action-btn" 
-              onClick={handleSaveJson}
-              title="Save to disk"
-            >
-              💾 Save
-            </button>
-            <button 
-              className="action-btn" 
-              onClick={onNewFile}
-              title="Clear and upload new file"
-            >
-              📁 New
-            </button>
-            <button 
-              className="action-btn" 
-              onClick={onClearData}
-              title="Close editor"
-            >
-              ✖️ Clear
-            </button>
-          </div>
-        )}
       </div>
 
       {isRenderingJson && (
@@ -109,8 +66,15 @@ const JsonDisplayPanel: React.FC<JsonDisplayPanelProps> = ({
         />
       )}
 
-      <div className="json-container">
-        {formattedJson ? (
+      {error && (
+        <div className="decode-error" role="alert">
+          <strong>Could not decode CBOR:</strong>
+          <p>{error}</p>
+        </div>
+      )}
+
+      {formattedJson && (
+        <div className="json-container">
           <div className="json-editor-wrapper">
             <CodeMirror
               value={formattedJson}
@@ -121,12 +85,8 @@ const JsonDisplayPanel: React.FC<JsonDisplayPanelProps> = ({
               className="json-editor"
             />
           </div>
-        ) : (
-          <div className="centered-loading">
-            {/* Panel only shows when jsonData exists, so this shouldn't happen */}
-          </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };
