@@ -134,6 +134,10 @@ cbor2json --in sample.cbor --out output.json
   using UTC unless another timezone is selected with `--tz`. The shared decoder
   can also preserve a timestamp as an explicit tagged JSON object. An invalid
   timezone is an error in ISO mode.
+- The Settings pane controls tag representation, timestamp formatting, large
+  integer output, and non-string map-key handling. Global tag representation
+  wraps every tag as `{ "$cbor": "tag", "tag": ..., "value": ... }` and
+  overrides the timestamp setting.
 - Non-string map keys are coerced to strings by default for compatibility;
   collisions after coercion are rejected. Strict map-key mode rejects any
   non-string key. Duplicate string keys, undefined, non-finite floats, decimal

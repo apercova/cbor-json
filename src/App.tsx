@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import './App.css';
 import FileUploadPanel, { FileUploadPanelRef } from './components/FileUploadPanel';
 import JsonDisplayPanel from './components/JsonDisplayPanel';
+import SettingsPane, { DecoderSettings } from './components/SettingsPane';
 
 function App() {
   const [jsonText, setJsonText] = useState<string | null>(null);
@@ -9,6 +10,13 @@ function App() {
   const [decodeError, setDecodeError] = useState<string>('');
   const [fileName, setFileName] = useState<string>('');
   const [isProcessingFile, setIsProcessingFile] = useState<boolean>(false);
+  const [showSettings, setShowSettings] = useState<boolean>(false);
+  const [settings, setSettings] = useState<DecoderSettings>({
+    preserveTags: false,
+    timestampFormat: 'epoch',
+    largeIntegerMode: 'exact',
+    strictMapKeys: false,
+  });
   const fileUploadRef = useRef<FileUploadPanelRef>(null);
 
   const handleCborConverted = (convertedJson: string, warnings: string[], originalFileName: string) => {
@@ -58,10 +66,20 @@ function App() {
           <div className="title-section">
             <h1>CBOR to JSON Converter</h1>
           </div>
+          <button
+            className="settings-button"
+            type="button"
+            aria-expanded={showSettings}
+            aria-controls="decoder-settings"
+            onClick={() => setShowSettings((isOpen) => !isOpen)}
+          >
+            ⚙ Settings
+          </button>
         </div>
       </header>
       
       <div className="main-container">
+        {showSettings && <SettingsPane settings={settings} onChange={setSettings} />}
         <div className="panel-container">
           {/* Show upload panel when no data or processing */}
           {((!jsonText && !decodeError) || isProcessingFile) && (
@@ -71,6 +89,7 @@ function App() {
               onFileProcessingStart={handleFileProcessingStart}
               onFileProcessingError={handleFileProcessingError}
               onError={setDecodeError}
+              decodeOptions={settings}
               isProcessing={isProcessingFile}
             />
           )}

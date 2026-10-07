@@ -1,6 +1,7 @@
 import React, { useState, useImperativeHandle, forwardRef } from 'react';
 import LoadingIndicator from './LoadingIndicator';
 import { useFileHandler } from '../hooks/useFileHandler';
+import type { DecodeCborOptions } from '../utils/decodeCbor.mjs';
 import './FileUploadPanel.css';
 
 interface FileUploadPanelProps {
@@ -8,6 +9,7 @@ interface FileUploadPanelProps {
   onFileProcessingStart: () => void;
   onFileProcessingError: () => void;
   onError: (error: string) => void;
+  decodeOptions: DecodeCborOptions;
   isProcessing?: boolean;
 }
 
@@ -15,7 +17,7 @@ export interface FileUploadPanelRef {
   openFileDialog: () => void;
 }
 
-const FileUploadPanel = forwardRef<FileUploadPanelRef, FileUploadPanelProps>(({ onCborConverted, onFileProcessingStart, onFileProcessingError, onError, isProcessing = false }, ref) => {
+const FileUploadPanel = forwardRef<FileUploadPanelRef, FileUploadPanelProps>(({ onCborConverted, onFileProcessingStart, onFileProcessingError, onError, decodeOptions, isProcessing = false }, ref) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const [uploadedFileName, setUploadedFileName] = useState<string>('');
   
@@ -23,7 +25,8 @@ const FileUploadPanel = forwardRef<FileUploadPanelRef, FileUploadPanelProps>(({ 
     onCborConverted,
     onFileProcessingStart,
     onFileProcessingError,
-    onError
+    onError,
+    decodeOptions
   });
 
   // Expose openFileDialog to parent components

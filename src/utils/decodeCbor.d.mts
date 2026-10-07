@@ -6,6 +6,8 @@ export interface DecodeCborOptions {
   formatDate?: boolean;
   /** Large integers are exact JSON number tokens by default; number mode may round. */
   largeIntegerMode?: 'exact' | 'number';
+  /** Preserve every CBOR tag as an explicit tagged JSON object, overriding tag-specific handling. */
+  preserveTags?: boolean;
   timezone?: string;
   maxDepth?: number;
   /** Reject CBOR maps containing non-string keys instead of coercing them to strings. */

@@ -2,19 +2,22 @@ import { useRef } from 'react';
 import { processCborFile } from '../utils/cborProcessor';
 import { SUPPORTED_FILE_EXTENSIONS } from '../constants';
 import { fileTooLargeMessage } from '../constants/limits';
+import type { DecodeCborOptions } from '../utils/decodeCbor.mjs';
 
 interface UseFileHandlerProps {
   onCborConverted: (jsonText: string, warnings: string[], fileName: string) => void;
   onFileProcessingStart: () => void;
   onFileProcessingError: () => void;
   onError?: (error: string) => void;
+  decodeOptions: DecodeCborOptions;
 }
 
 export const useFileHandler = ({
   onCborConverted,
   onFileProcessingStart,
   onFileProcessingError,
-  onError
+  onError,
+  decodeOptions,
 }: UseFileHandlerProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -31,7 +34,7 @@ export const useFileHandler = ({
     onFileProcessingStart();
 
     try {
-      const result = await processCborFile(file);
+      const result = await processCborFile(file, decodeOptions);
       
       if (result.success) {
         onCborConverted(result.jsonText, result.warnings, file.name);

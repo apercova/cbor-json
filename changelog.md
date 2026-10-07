@@ -7,6 +7,7 @@ Added CBOR decoder improvements and aligned output with compatibility and precis
 - Timestamp tags now output epoch-second numbers by default, with ISO formatting and tagged preservation available through decoder options.
 - Large native integers default to exact unquoted JSON number tokens; optional JavaScript `Number` conversion warns when it changes a value.
 - Non-string map keys coerce to strings by default, with strict rejection available through decoder options.
+- Added a settings pane for global tag representation, timestamp format, large integer mode, and non-string map-key handling.
 - Left-aligned warnings and moved decode errors into the output panel beneath warnings.
 - Updated README and P4 backlog; type-check, lint, and all tests pass.
 

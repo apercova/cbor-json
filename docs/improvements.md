@@ -26,7 +26,7 @@ by leaving CRA, not by `npm audit fix --force`.
 | Path | Role | Notes |
 | --- | --- | --- |
 | `src/index.tsx` | CRA entry | StrictMode only. No error boundary. |
-| `src/App.tsx` | Screen switch | Upload panel or JSON panel. State is formatted JSON text, decoder warnings, a filename, and a processing flag. |
+| `src/App.tsx` | Screen switch | Upload panel or JSON panel, plus decoder settings for tag, timestamp, large integer, and map-key handling. |
 | `src/components/FileUploadPanel.tsx` | Drop/click upload | Clickable `div`. No keyboard path. Hidden file input. |
 | `src/hooks/useFileHandler.ts` | File input wiring | Rejects files over 100 MiB before `arrayBuffer()` and resets the input after selection. No extension check. |
 | `src/utils/cborProcessor.ts` | Browser decode | Reads the file and transfers its buffer to a Web Worker. |
@@ -161,14 +161,14 @@ describe this program.
   and it links demo hosts that are not this project.
 - State CBOR types the converter preserves, types it rewrites, and types it
   rejects.
-- Add a settings pane toggle for timestamp representation: epoch-second number
-  (the default), ISO 8601 string, or a nested JSON object that preserves the
-  CBOR tag and value.
-- Add a settings pane toggle for map-key handling: coerce non-string keys to
-  strings (the default) or enable strict mode, which rejects those keys.
-- Add a settings pane toggle for large integer output: exact decimal JSON
-  number tokens (the default) or JavaScript Number conversion, with a warning
-  whenever that mode rounds an integer.
+- [x] Add a settings pane toggle that preserves all tags as JSON tag objects;
+  it overrides timestamp formatting. Timestamp tags can otherwise be epoch
+  seconds (default) or ISO 8601 strings.
+- [x] Add a settings pane toggle for map-key handling: coerce non-string keys
+  to strings (default) or enable strict mode, which rejects those keys.
+- [x] Add a settings pane toggle for large integer output: exact decimal JSON
+  number tokens (default) or JavaScript Number conversion, with a warning when
+  that mode changes an integer.
 
 ## Suggested order
 

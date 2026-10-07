@@ -261,6 +261,7 @@ export function decodeCbor(inputBytes, options = {}) {
     maxDepth = DEFAULT_MAX_DEPTH,
     strictMapKeys = false,
     largeIntegerMode = 'exact',
+    preserveTags = false,
   } = options;
   const timestampFormat = options.timestampFormat
     ?? (options.formatDate === false ? 'tagged' : options.formatDate === true ? 'iso' : 'epoch');
@@ -277,7 +278,7 @@ export function decodeCbor(inputBytes, options = {}) {
   const bytes = new Uint8Array(inputBytes);
   validateDepth(bytes, maxDepth);
   const warnings = [];
-  const tags = {
+  const standardTags = {
     0: (decodeValue) => {
       const value = decodeValue();
       if (timestampFormat === 'tagged') return taggedValue(0, value);
@@ -293,6 +294,18 @@ export function decodeCbor(inputBytes, options = {}) {
     4: () => fail('UNSUPPORTED_DECIMAL', 'CBOR decimal fractions (tag 4) are not supported by JSON output.'),
     5: () => fail('UNSUPPORTED_DECIMAL', 'CBOR bigfloats (tag 5) are not supported by JSON output.'),
   };
+  const tags = preserveTags
+    ? new Proxy(Object.create(null), {
+      get: (_target, property) => {
+        if (typeof property !== 'string' || !/^\d+$/.test(property)) return undefined;
+        const numericTag = Number(property);
+        const tag = Number.isSafeInteger(numericTag)
+          ? numericTag
+          : { [INTERNAL_INTEGER]: property };
+        return (decodeValue) => taggedValue(tag, decodeValue());
+      },
+    })
+    : standardTags;
   let decoded;
   try {
     decoded = decode(bytes, {

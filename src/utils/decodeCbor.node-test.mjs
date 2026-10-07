@@ -66,9 +66,19 @@ test('represents timestamp tags as epoch seconds by default', () => {
 
 test('supports ISO strings and explicit tagged timestamp forms', () => {
   assert.equal(JSON.parse(decodeHex('c100', { timestampFormat: 'iso', timezone: 'UTC' }).jsonText), '1970-01-01T00:00:00.000Z');
-  const tagged = decodeHex('c100', { timestampFormat: 'tagged' });
+  const tagged = decodeHex('c100', { preserveTags: true, timestampFormat: 'iso' });
   assert.deepEqual(JSON.parse(tagged.jsonText), { $cbor: 'tag', tag: 1, value: 0 });
   assert.equal(tagged.warnings.length, 1);
+});
+
+test('global tag representation preserves unsupported and known tags', () => {
+  assert.deepEqual(JSON.parse(decodeHex('c4822001', { preserveTags: true }).jsonText), {
+    $cbor: 'tag', tag: 4, value: [-1, 1],
+  });
+  assert.deepEqual(JSON.parse(decodeHex('d9ea6000', { preserveTags: true }).jsonText), {
+    $cbor: 'tag', tag: 60000, value: 0,
+  });
+  assert.equal(decodeHex('dbffffffffffffffff00', { preserveTags: true }).jsonText, '{\n  "$cbor": "tag",\n  "tag": 18446744073709551615,\n  "value": 0\n}');
 });
 
 test('preserves bignum tags and their byte payload with warnings', () => {
