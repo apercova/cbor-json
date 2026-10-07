@@ -26,6 +26,9 @@ describe('cbor2json safety', () => {
     const result = run(['--help']);
     expect(result.status).toBe(0);
     expect(result.stdout).toMatch(/--force/);
+    expect(result.stdout).toMatch(/--preserve-tags/);
+    expect(result.stdout).toMatch(/--large-integer-mode/);
+    expect(result.stdout).toMatch(/--strict-map-keys/);
     expect(result.stdout).toMatch(/Paths are used as given/);
     expect(result.stdout).toMatch(/100 MiB/);
   });
@@ -60,6 +63,62 @@ describe('cbor2json safety', () => {
     const result = run(['--in', input, '--out', output]);
     expect(result.status).toBe(0);
     expect(JSON.parse(fs.readFileSync(output, 'utf8'))).toBe(1666104888.789);
+  });
+
+  it('preserves every tag when --preserve-tags is set', () => {
+    const input = path.join(dir, 'tag.cbor');
+    const output = path.join(dir, 'tag.json');
+    fs.writeFileSync(input, Buffer.from([0xc1, 0x00]));
+    const result = run(['--in', input, '--out', output, '--preserve-tags', '--fd', '--tz', 'Mars/Olympus']);
+
+    expect(result.status).toBe(0);
+    expect(JSON.parse(fs.readFileSync(output, 'utf8'))).toEqual({ $cbor: 'tag', tag: 1, value: 0 });
+    expect(result.stderr).toMatch(/CBOR tag 1 was preserved/);
+  });
+
+  it('supports JavaScript Number conversion for large integers and warns on rounding', () => {
+    const input = path.join(dir, 'large-integer.cbor');
+    const output = path.join(dir, 'large-integer.json');
+    const exactOutput = path.join(dir, 'large-integer-exact.json');
+    fs.writeFileSync(input, Buffer.from('1b0de0b6b3a9b8896a', 'hex'));
+
+    const exact = run(['--in', input, '--out', exactOutput]);
+    expect(exact.status).toBe(0);
+    expect(fs.readFileSync(exactOutput, 'utf8')).toBe('1000000000039094634');
+    expect(exact.stderr).not.toMatch(/rounded/);
+
+    const result = run(['--in', input, '--out', output, '--large-integer-mode', 'number']);
+
+    expect(result.status).toBe(0);
+    expect(fs.readFileSync(output, 'utf8')).toBe('1000000000039094700');
+    expect(result.stderr).toMatch(/converted to a JavaScript Number and may be rounded/);
+  });
+
+  it('rejects non-string map keys in strict mode', () => {
+    const input = path.join(dir, 'map.cbor');
+    const output = path.join(dir, 'map.json');
+    fs.writeFileSync(input, Buffer.from([0xa1, 0x01, 0x61, 0x61]));
+    const result = run(['--in', input, '--out', output, '--strict-map-keys']);
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).toMatch(/NON_STRING_MAP_KEY/);
+    expect(fs.existsSync(output)).toBe(false);
+  });
+
+  it('coerces non-string map keys by default', () => {
+    const input = path.join(dir, 'map-default.cbor');
+    const output = path.join(dir, 'map-default.json');
+    fs.writeFileSync(input, Buffer.from([0xa1, 0x01, 0x61, 0x61]));
+    const result = run(['--in', input, '--out', output]);
+
+    expect(result.status).toBe(0);
+    expect(JSON.parse(fs.readFileSync(output, 'utf8'))).toEqual({ 1: 'a' });
+  });
+
+  it('rejects an unknown large-integer mode', () => {
+    const result = run(['--large-integer-mode', 'approximate']);
+    expect(result.status).toBe(1);
+    expect(result.stderr).toMatch(/must be exact or number/);
   });
 
   it('encodes byte strings explicitly and reports a warning on stderr', () => {

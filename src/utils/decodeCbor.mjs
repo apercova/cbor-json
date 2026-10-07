@@ -274,7 +274,7 @@ export function decodeCbor(inputBytes, options = {}) {
   if (!['exact', 'number'].includes(largeIntegerMode)) {
     fail('INVALID_OPTIONS', 'Large integer mode must be exact or number.');
   }
-  if (timestampFormat === 'iso') assertTimezone(timezone);
+  if (timestampFormat === 'iso' && !preserveTags) assertTimezone(timezone);
   const bytes = new Uint8Array(inputBytes);
   validateDepth(bytes, maxDepth);
   const warnings = [];

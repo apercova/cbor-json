@@ -1,6 +1,6 @@
 # CBOR to JSON Converter
 
-A modern, responsive React application that converts CBOR (Concise Binary Object Representation) files to JSON with a beautiful, professional interface.
+A browser application and local CLI for converting CBOR (Concise Binary Object Representation) files to JSON.
 
 ![React](https://img.shields.io/badge/React-18.2.0-blue?logo=react) ![TypeScript](https://img.shields.io/badge/TypeScript-4.9.0-blue?logo=typescript) ![License](https://img.shields.io/badge/License-MIT-green)
 
@@ -10,29 +10,30 @@ A modern, responsive React application that converts CBOR (Concise Binary Object
 - **🖥️ CLI Tool**: Convert CBOR files to JSON with required `--in`, optional `--out`, and overwrite protection
 - **📏 Input Limit**: Accepts CBOR files up to 100 MiB in both the browser and CLI
 - **🚀 Drag & Drop Interface**: Simply drag CBOR files onto the upload area
-- **📁 File Browser**: Click to browse and select CBOR files (.cbor, .bin)
+- **📁 File Browser**: Use the keyboard-accessible Open file or Choose a file button to select CBOR files (.cbor, .bin)
 - **⚡ Live Conversion**: Real-time conversion from CBOR to JSON with loading indicators
-- **🔄 Quick File Switching**: "New" button for rapid file uploads without clearing current data
+- **🔄 Quick File Switching**: Open file button for rapid file uploads
 - **💾 Save to Disk**: Download converted JSON files with sanitized filenames
-- **🧹 Smart Clear**: Reset to upload new files or return to upload interface
+- **🧹 Clear**: Close the current output and return to the upload interface
 
-### 📝 Professional JSON Editor
-- **🎨 Syntax Highlighting**: Beautiful JSON display powered by CodeMirror 6
+### 📝 JSON Output
+- **🎨 Syntax Highlighting**: JSON display powered by CodeMirror 6
 - **📊 Line Numbers**: Easy navigation with line count display
 - **⚙️ Smart File Handling**: 
   - JSON up to 100,000 formatted characters: Editable with syntax highlighting
-  - JSON over 100,000 formatted characters: Uses the large-output editor configuration
-- **⚠️ Large Output Warnings**: Shown when formatted JSON exceeds 100,000 characters
-- **⌨️ Keyboard Shortcuts**: Standard editor shortcuts (Cmd+A, Escape, etc.)
+  - JSON over 100,000 formatted characters: Read-only editor configuration for viewing large output
+- **⚠️ Large Output Warnings**: States the 100,000-character formatted JSON threshold
+- **⌨️ Keyboard Shortcuts**: Select all with Cmd/Ctrl+A; Escape collapses the selection
 - **🔍 Code Folding**: Collapse JSON objects and arrays for better navigation
 
-### 🎨 Modern UI/UX
-- **📱 Responsive Design**: Perfect on desktop, tablet, and mobile devices
+### 🎨 Interface
+- **📱 Responsive Design**: Layout adapts to desktop, tablet, and mobile screens
 - **🖥️ Single Panel Interface**: Clean, focused UI that switches between upload and display
 - **⏳ Loading States**: Professional loading indicators during file processing
-- **✨ Glass Morphism**: Modern design with backdrop blur effects
-- **📏 Adaptive Header**: Title and description adapt to different screen sizes
-- **🎯 Intuitive Navigation**: Clear visual feedback and smooth transitions
+- **⌨️ Accessible Status**: Loading is announced to assistive technology; decoding errors are announced as alerts
+- **🛟 Render Recovery**: An error boundary displays a recovery message if the interface fails to render
+- **⚙️ Decoder Settings**: Configure tag, timestamp, large-integer, and map-key output behavior
+- **❔ Help pane**: Find a short service description and library attributions
 
 ### 🛡️ Robust Error Handling
 - **❌ Invalid CBOR Format**: Clear messaging for malformed files
@@ -44,7 +45,7 @@ A modern, responsive React application that converts CBOR (Concise Binary Object
 
 ### Prerequisites
 
-- **Node.js** 16+ (recommended: current LTS)
+- **Node.js** 16+ (matches the `engines` field in `package.json`)
 - **npm** 8+ or **yarn** 1.22+
 
 ### Installation
@@ -54,8 +55,8 @@ A modern, responsive React application that converts CBOR (Concise Binary Object
 git clone https://github.com/apercova/cbor-json.git
 cd cbor-json
 
-# Install dependencies (this will install everything needed)
-npm install
+# Install dependencies
+npm ci
 
 # Verify installation
 npm run type-check
@@ -86,6 +87,15 @@ npm run cbor2json -- --in sample.cbor
 npm run cbor2json -- --in sample.cbor --fd --tz "-06:00"
 npm run cbor2json -- --in sample.cbor --fd --tz America/Mexico_City
 
+# Preserve all CBOR tags as tagged JSON objects
+npm run cbor2json -- --in sample.cbor --preserve-tags
+
+# Use JavaScript Number conversion for large integers (may round; warns on stderr)
+npm run cbor2json -- --in sample.cbor --large-integer-mode number
+
+# Reject maps containing non-string keys instead of coercing them
+npm run cbor2json -- --in sample.cbor --strict-map-keys
+
 # Show all CLI options and the input size limit
 npm run cbor2json -- --help
 
@@ -113,40 +123,50 @@ cbor2json --in sample.cbor --out output.json
 | `--out <file>` | JSON output file (optional; defaults to current directory with `.json` extension) |
 | `--fd` | Format timestamp tags (0, 1) as ISO 8601 strings; timestamps are epoch seconds by default |
 | `--tz <tz>` | Timezone for ISO timestamp strings (optional; defaults to UTC). Examples: `UTC`, `-06:00`, `+05:30`, `America/Mexico_City` |
+| `--preserve-tags` | Preserve every CBOR tag as a tagged JSON object; overrides timestamp formatting |
+| `--large-integer-mode <exact\|number>` | Choose exact unquoted decimal tokens (default) or JavaScript Number conversion, which may round values |
+| `--strict-map-keys` | Reject non-string map keys instead of coercing them to strings |
 | `--force` | Allow overwriting an existing output file |
 | `--help`, `-h` | Print CLI usage |
 
 ### CBOR Conversion Policy
 
-- Arrays, text strings, booleans, null, and finite JSON-range numbers are
-  represented directly in JSON. Map keys are coerced to strings by default.
-- Byte strings use `{ "$cbor": "bytes", "base64": "..." }` and produce a
-  warning. CBOR tags, including bignum tags 2 and 3, remain explicit tagged
-  objects and produce warnings. Large native CBOR integers are written as
-  exact unquoted decimal JSON number tokens by default. Consumers using
-  JavaScript numbers may round them when parsing. The shared decoder also offers
-  a Number mode that matches the former `cbor-js` behavior and warns if
-  conversion changes the integer. Negative zero uses an explicit tagged float
-  form.
-- Timestamp tags 0 and 1 become epoch-second JSON numbers by default. Tag 0
-  date strings are converted to epoch seconds; fractional seconds are retained
-  to millisecond precision. The CLI `--fd` option selects ISO 8601 strings,
-  using UTC unless another timezone is selected with `--tz`. The shared decoder
-  can also preserve a timestamp as an explicit tagged JSON object. An invalid
-  timezone is an error in ISO mode.
-- The Settings pane controls tag representation, timestamp formatting, large
-  integer output, and non-string map-key handling. Global tag representation
-  wraps every tag as `{ "$cbor": "tag", "tag": ..., "value": ... }` and
-  overrides the timestamp setting. An IANA timezone selector is available for
-  ISO output after enabling its searchable timezone picker; it defaults to UTC
-  and resets to UTC when the toggle or timestamp format changes. Epoch values
-  always remain the original instant.
-- Non-string map keys are coerced to strings by default for compatibility;
-  collisions after coercion are rejected. Strict map-key mode rejects any
-  non-string key. Duplicate string keys, undefined, non-finite floats, decimal
-  and bigfloat tags 4 and 5, and unknown tags are rejected with a clear error.
-- Browser decoding runs in a Web Worker. Both interfaces enforce a 100 MiB
-  input cap and a maximum nesting depth of 128.
+- The browser and CLI use the same decoder; browser decoding runs in a Web
+  Worker. Both reject inputs above 100 MiB and nesting deeper than 128 levels.
+
+| CBOR value | Default JSON output |
+| --- | --- |
+| Null, booleans, text, arrays, finite numbers | Corresponding JSON value |
+| Maps | JSON objects; non-string keys are coerced to strings. Collisions after coercion are errors. |
+| Byte strings | `{ "$cbor": "bytes", "base64": "..." }`, with a warning |
+| Native integers beyond JavaScript's exact range | Exact, unquoted decimal JSON number token |
+| Negative zero | `{ "$cbor": "float", "value": "-0" }`, with a warning |
+| Tags 0 and 1 (timestamps) | Epoch seconds; tag 0 date strings are converted to epoch seconds |
+| Tags 2 and 3 (bignums) | Explicit tagged object, with a warning |
+| Undefined, NaN, infinities, duplicate map keys, tags 4 and 5, and other tags | Rejected with an error |
+
+Warnings are logged to the browser console and written to CLI stderr. Exact
+integer tokens preserve the CBOR value in the JSON text, though consumers that
+parse them as JavaScript numbers may round them. The CLI flags in the option
+table expose the same decoder policies as the Settings pane; both interfaces
+use the same defaults.
+
+### Decoder Settings
+
+Open **Settings** in the header. Settings apply to the next file you decode.
+The CLI equivalents are listed alongside each setting; pass the flags on each
+conversion command.
+
+| Setting | Default | Behavior and CLI option |
+| --- | --- | --- |
+| **Tag representation** | Off | Emit every CBOR tag as `{ "$cbor": "tag", "tag": ..., "value": ... }`. Overrides timestamp formatting and allows otherwise unsupported tags, including tags 4 and 5, to be preserved. Enabling it resets the timezone choice to disabled/UTC. CLI: `--preserve-tags`. |
+| **Timestamp tags** | Epoch seconds | Choose epoch seconds or ISO 8601 strings for tags 0 and 1. The selector is overridden while Tag representation is on. CLI: `--fd` selects ISO. |
+| **Timezone** | Disabled; UTC when enabled | Available for ISO output. Enable the searchable timezone picker to format the local time and applicable offset. It resets to UTC when toggled or when timestamp format changes. Epoch output is unchanged. CLI: `--tz <timezone>` (used with `--fd`). |
+| **Large integers** | Exact JSON number | Exact mode emits the integer as an unquoted decimal token. JavaScript Number mode can round it and warns when conversion changes the value. CLI: `--large-integer-mode exact\|number`. |
+| **Non-string map keys** | Coerce to strings | Compatibility mode stringifies non-string keys. Strict mode rejects any map containing one. Duplicate keys and collisions after coercion are rejected in either mode. CLI: `--strict-map-keys` enables strict mode. |
+
+Byte strings remain base64 objects and negative zero remains an explicit float
+object in all settings modes.
 
 #### ✅ Installation Verification
 If `npm install` completed successfully, you should have:
@@ -173,13 +193,12 @@ npx serve -s build
    - Visual feedback with drag-over effects
 
 2. **File Browser**: 
-   - Click the upload area to choose a file
+   - Activate **Choose a file** or **Open file** with a mouse or keyboard
    - Select the same file again after a previous conversion if needed
    - Files larger than 100 MiB are rejected before being read
 
-3. **Quick Upload**: 
-   - Use "📁 New" button from JSON panel for rapid file switching
-   - No need to clear current data first
+3. **Quick Upload**:
+   - Use the **Open file** button in the header to choose another file
 
 ### 📋 Working with JSON Output
 
@@ -188,11 +207,11 @@ npx serve -s build
   - Copy, select all, and standard editor features
   
 - **👁️ Longer JSON** (over 100,000 formatted characters):
-  - Displayed using the large-output editor configuration
+  - Read-only in the large-output editor configuration
   
 - **📊 File Information**: 
   - Line count displayed in header
-  - File size warnings when applicable
+  - Large-output warning when formatted JSON exceeds 100,000 characters
   
 - **💾 Export Options**: 
   - Save as `.json` file with a sanitized filename based on the upload name
@@ -201,7 +220,7 @@ npx serve -s build
 
 - **⌨️ Keyboard Shortcuts**:
   - `Cmd/Ctrl + A`: Select all JSON content
-  - `Escape`: Clear selection
+  - `Escape`: Collapse the current selection
   - Standard editor navigation
 
 - **🎯 Smart Navigation**:
@@ -243,22 +262,26 @@ bin/
 scripts/
 └── inject-csp.js            # 🛡️ Add and validate CSP in production HTML
 samples/
-└── small.cbor                # 📄 26-byte example CBOR file
+└── small.cbor                # 📄 37-byte example CBOR file
 public/
+├── favicon.svg               # Browser icon
 └── _headers                  # 🛡️ Netlify security response headers
 vercel.json                   # 🛡️ Vercel security response headers
 src/
 ├── components/               # React components
 │   ├── FileUploadPanel.tsx   # 📤 Upload interface with drag & drop
-│   ├── FileUploadPanel.css   # Upload panel styling
+│   ├── ErrorBoundary.tsx     # 🛟 Recovery UI for render errors
 │   ├── JsonDisplayPanel.tsx  # 📋 JSON viewer with CodeMirror
-│   ├── JsonDisplayPanel.css  # JSON panel styling
+│   ├── SettingsPane.tsx      # ⚙️ Decoder options
+│   ├── TimezoneSelector.tsx  # Searchable timezone control
+│   ├── HelpPane.tsx          # About and library attributions
 │   ├── LoadingIndicator.tsx  # ⏳ Reusable loading component
-│   └── LoadingIndicator.css  # Loading indicator styles
+│   └── ...                   # Component styles and tests
 ├── hooks/                    # Custom React hooks
 │   └── useFileHandler.ts     # 🔄 Reusable file processing logic
 ├── utils/                    # Utility functions
 │   ├── cborProcessor.ts      # 🧵 Worker-based browser decoder
+│   ├── cbor.worker.ts         # Browser worker entry
 │   ├── decodeCbor.mjs        # 🔢 Shared CBOR-to-JSON policy and decoder
 │   ├── downloadName.ts       # 🧹 Safe JSON download filenames
 │   └── editorConfig.ts       # ⚙️ CodeMirror configuration
@@ -271,36 +294,18 @@ src/
 └── index.css               # 🌐 Global CSS reset and base styles
 ```
 
-## 🌍 Browser Compatibility
+## 🌍 Browser Requirements
 
-### ✅ Fully Supported
-- **Chrome** 88+ (Recommended)
-- **Firefox** 85+
-- **Safari** 14+
-- **Edge** 88+
-
-### 🔧 Required Web APIs
-- **File API** - Reading uploaded files
-- **Drag and Drop API** - File upload interface
-- **ArrayBuffer/Uint8Array** - Binary data processing
-- **Blob API** - File download functionality
-- **ES6+ Features** - Modern JavaScript support
-
-### 📱 Mobile Support
-- **iOS Safari** 14+
-- **Chrome Mobile** 88+
-- **Firefox Mobile** 85+
+The app uses the File API, Web Workers, typed arrays, Blob downloads, and
+`Intl.DateTimeFormat` for timezone formatting. The project does not maintain a
+verified browser-version compatibility matrix; see the `browserslist` field in
+`package.json` for build targets.
 
 ## 🚀 Deployment
 
-Ready to deploy your own instance? See the [deployment guide](docs/DEPLOY.md).
-Vercel and Netlify header configuration is included in this repository. GitHub
-Pages receives CSP and referrer meta policies, but cannot set all response
-headers.
-
-- 🚀 **Vercel**
-- 🌐 **Netlify**
-- 🐙 **GitHub Pages**
+See [docs/DEPLOY.md](docs/DEPLOY.md) for GitHub Pages, Vercel, and Netlify
+instructions. The repository includes configuration for these static hosting
+options.
 
 ## 🔧 Development
 
@@ -313,34 +318,28 @@ npm test            # Run the full test suite once
 npm run type-check  # Check TypeScript
 npm run lint        # Lint source files
 npm run build      # Create production build
-npm run eject      # Eject from Create React App (irreversible)
-
 # CLI
 npm run cbor2json -- --help  # Show CLI options
 
-# Deployment
-npm run predeploy  # Build before deployment
-npm run deploy     # Deploy to GitHub Pages
+# GitHub Pages deployment
+npm run deploy     # Builds and publishes build/ to the gh-pages branch
 ```
 
 ### 🧪 Code Quality Features
 
 - **📘 TypeScript** - Static type checking for the TypeScript application code
 - **🔍 ESLint** - Code linting with React and TypeScript rules
-- **🧪 Jest tests** - Input limits, download names, CLI safety, and CSP generation
+- **🧪 Jest tests** - Decoder behavior, input limits, UI controls, and CLI safety
 - **📚 RFC fixtures** - Decoder coverage using RFC 8949 Appendix A vectors
 - **🎯 DRY Principles** - Reusable components, hooks, and utilities
 - **⚛️ Modern React Patterns** - Hooks, forwardRef, useImperativeHandle
 - **🏗️ Component Architecture** - Modular, maintainable code structure
 
-### 🧪 Testing Production Build
+### Production Build
 
-```bash
-# Build and test locally
-npm run build
-npx serve -s build
-
-```
+`npm run build` creates the static site in `build/`, checks for inline scripts,
+and injects the production Content Security Policy. Inspect it locally with
+`npx serve -s build`.
 
 ## 🤝 Contributing
 
@@ -368,20 +367,26 @@ We welcome contributions! Here's how you can help:
 - Fix typos or clarify instructions
 - Add examples or use cases
 
-## 📏 File Size and Performance
+## 📏 Input Size and Runtime
 
 The browser and CLI reject inputs larger than 100 MiB before reading them.
 This is an input limit, not a performance guarantee. Browser decoding and JSON
-formatting can use substantially more memory than the source CBOR file.
+formatting can use substantially more memory than the source CBOR file. Browser
+decoding runs in a Web Worker. JSON output over 100,000 formatted characters
+uses a read-only editor configuration. The app does not implement virtual
+scrolling or publish performance benchmarks.
 
 ## 🛡️ Security & Privacy
 
-- **🔒 Client-Side Processing** - Files never leave your browser
-- **🚫 No Data Collection** - Zero tracking or analytics
-- **🔐 Secure File Handling** - Modern Web APIs with security best practices
-- **🛡️ Content Security Policy** - Production builds add a policy that blocks
-  inline scripts. Vercel and Netlify configurations also set CSP,
+- **🔒 Local Processing** - Browser files are decoded locally in a Web Worker;
+  the app does not upload them. The CLI reads and writes the paths you provide
+  with your operating-system permissions.
+- **🚫 No Analytics** - This repository contains no analytics integration.
+- **🛡️ Production Policy** - The build injects a Content Security Policy and
+  rejects inline scripts. Vercel and Netlify configurations set CSP,
   `Referrer-Policy`, and `X-Content-Type-Options: nosniff` response headers.
+  GitHub Pages receives the CSP and referrer policy through HTML metadata but
+  cannot set all response headers.
 
 ## 📄 License
 

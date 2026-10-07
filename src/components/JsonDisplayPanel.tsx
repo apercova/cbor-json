@@ -54,7 +54,7 @@ const JsonDisplayPanel: React.FC<JsonDisplayPanelProps> = ({
           )}
           {isLargeFile && (
             <div className="large-file-warning">
-              ⚠️ Large file (&gt;100KB) - Editor optimized for viewing
+              ⚠️ Large JSON output (over {LARGE_FILE_THRESHOLD.toLocaleString()} characters) — editor optimized for viewing
             </div>
           )}
         </div>

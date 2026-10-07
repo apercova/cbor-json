@@ -1,6 +1,30 @@
 # Changelog
 
 2026-10-06:
+Added CLI flags for all decoder settings and documented browser/CLI parity.
+
+- Added `--preserve-tags`, `--large-integer-mode exact|number`, and `--strict-map-keys`.
+- Preserved existing defaults and shared decoder behavior; warnings continue to go to stderr.
+- Added CLI coverage for tag preservation, integer rounding, strict map keys, invalid modes, and help output.
+
+2026-10-06:
+Completed the P4 documentation backlog.
+
+- Rewrote the deployment guide for the repository's GitHub Pages, Vercel, and Netlify configurations.
+- Updated README security, runtime, browser requirement, architecture, and CBOR conversion documentation.
+- Documented every decoder setting, its default, behavior, and precedence.
+- Corrected stale repository, deployment, upload, editor, browser-support, and architecture details; marked P4 complete.
+
+2026-10-06:
+Completed the P3 UI accessibility and resilience backlog.
+
+- Added a keyboard accessible file picker button and open the file dialog directly from the Open file action.
+- Added live announcements for loading, indeterminate progress semantics, and an error boundary with a recovery message.
+- Escape now clears the editor selection, and the large-output warning states the 100,000-character threshold accurately.
+- Added the referenced SVG favicon and coverage for the new behaviors.
+- Updated the P3 backlog to mark these items complete.
+
+2026-10-06:
 Added CBOR decoder improvements and aligned output with compatibility and precision requirements.
 
 - Replaced `cbor-js` with the shared `cborg` decoder for browser and CLI, including RFC vectors, depth/input limits, and safer CBOR-to-JSON handling.
@@ -20,5 +44,5 @@ Improved file handling and security across the browser app and CLI.
 - Sanitized downloaded JSON filenames and reset the file input after selection.
 - Hardened the CLI with required `--in`, strict flag validation, `--help`, and overwrite protection via `--force`.
 - Added production CSP and host security headers, disabled production source maps, and bound the development server to localhost.
-- Added safety tests and a 26-byte CBOR sample at `samples/small.cbor`.
+- Added safety tests and a 37-byte CBOR sample at `samples/small.cbor`.
 - Updated the improvement assessment and Claude rules for implemented safeguards and testing expectations.

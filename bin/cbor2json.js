@@ -2,7 +2,7 @@
 
 /**
  * CLI to convert CBOR files to JSON using the shared decoder.
- * Usage: cbor2json --in <input.cbor> [--out <output.json>] [--force] [--fd] [--tz <timezone>]
+ * Usage: cbor2json --in <input.cbor> [--out <output.json>] [options]
  *
  * Paths are used as given. This process reads and writes those paths with
  * the permissions of the user who runs it. It does not confine writes to
@@ -16,13 +16,16 @@
  * --fd (format-date): Format timestamps as ISO 8601 strings
  * --tz <tz>: Timezone for ISO formatted dates. Optional, defaults to UTC.
  *   Examples: UTC, -06:00, +05:30, America/Mexico_City
+ * --preserve-tags: Preserve all CBOR tags as tagged JSON objects
+ * --large-integer-mode <exact|number>: Choose exact integer tokens or Number conversion
+ * --strict-map-keys: Reject maps with non-string keys
  */
 
 const fs = require('fs');
 const path = require('path');
 const { fileTooLargeMessage, MAX_INPUT_BYTES } = require('../src/constants/limits');
 
-const HELP = `Usage: cbor2json --in <input.cbor> [--out <output.json>] [--force] [--fd] [--tz <timezone>]
+const HELP = `Usage: cbor2json --in <input.cbor> [--out <output.json>] [options]
 
 Convert a CBOR file to JSON.
 
@@ -41,6 +44,14 @@ Options:
   --fd           Format timestamp tags (0, 1) as ISO 8601 strings
   --tz <tz>      Timezone for ISO timestamp strings (default UTC).
                  Examples: UTC, -06:00, +05:30, America/Mexico_City
+  --preserve-tags
+                 Preserve every CBOR tag as a tagged JSON object
+  --large-integer-mode <mode>
+                 Integer output mode: exact (default) or number. Number mode
+                 may round values and writes a warning to stderr.
+  --strict-map-keys
+                 Reject maps containing non-string keys instead of coercing
+                 those keys to strings
   --help, -h     Show this help
 
 Unknown flags are an error.
@@ -53,6 +64,9 @@ function parseArgs(argv) {
     outFile: null,
     timestampFormat: 'epoch',
     timezone: 'UTC',
+    preserveTags: false,
+    largeIntegerMode: 'exact',
+    strictMapKeys: false,
     force: false,
     help: false,
   };
@@ -72,6 +86,17 @@ function parseArgs(argv) {
     } else if (arg === '--tz') {
       result.timezone = requireValue(args, i, '--tz');
       i++;
+    } else if (arg === '--preserve-tags') {
+      result.preserveTags = true;
+    } else if (arg === '--large-integer-mode') {
+      const mode = requireValue(args, i, '--large-integer-mode');
+      if (!['exact', 'number'].includes(mode)) {
+        throw new Error(`--large-integer-mode must be exact or number; received: ${mode}`);
+      }
+      result.largeIntegerMode = mode;
+      i++;
+    } else if (arg === '--strict-map-keys') {
+      result.strictMapKeys = true;
     } else if (arg === '--force') {
       result.force = true;
     } else {
@@ -113,10 +138,22 @@ function deriveOutputPath(inputPath) {
 }
 
 async function processCborToJson(inputPath, options = {}) {
-  const { timestampFormat = 'epoch', timezone = 'UTC' } = options;
+  const {
+    timestampFormat = 'epoch',
+    timezone = 'UTC',
+    preserveTags = false,
+    largeIntegerMode = 'exact',
+    strictMapKeys = false,
+  } = options;
   const buffer = fs.readFileSync(inputPath);
   const { decodeCbor } = await import('../src/utils/decodeCbor.mjs');
-  return decodeCbor(new Uint8Array(buffer), { timestampFormat, timezone });
+  return decodeCbor(new Uint8Array(buffer), {
+    timestampFormat,
+    timezone,
+    preserveTags,
+    largeIntegerMode,
+    strictMapKeys,
+  });
 }
 
 async function main(argv = process.argv) {
@@ -135,7 +172,16 @@ async function main(argv = process.argv) {
     return;
   }
 
-  const { inFile, outFile, timestampFormat, timezone, force } = parsed;
+  const {
+    inFile,
+    outFile,
+    timestampFormat,
+    timezone,
+    preserveTags,
+    largeIntegerMode,
+    strictMapKeys,
+    force,
+  } = parsed;
 
   if (!inFile) {
     console.error('Error: --in <file> is required');
@@ -157,7 +203,13 @@ async function main(argv = process.argv) {
   }
 
   try {
-    const result = await processCborToJson(inFile, { timestampFormat, timezone });
+    const result = await processCborToJson(inFile, {
+      timestampFormat,
+      timezone,
+      preserveTags,
+      largeIntegerMode,
+      strictMapKeys,
+    });
     result.warnings.forEach((warning) => console.error(`Warning: ${warning}`));
     fs.writeFileSync(outputPath, result.jsonText, 'utf8');
 
