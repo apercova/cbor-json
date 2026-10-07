@@ -1,6 +1,13 @@
 # Changelog
 
 2026-10-06:
+Added CLI flags for all decoder settings and documented browser/CLI parity.
+
+- Added `--preserve-tags`, `--large-integer-mode exact|number`, and `--strict-map-keys`.
+- Preserved existing defaults and shared decoder behavior; warnings continue to go to stderr.
+- Added CLI coverage for tag preservation, integer rounding, strict map keys, invalid modes, and help output.
+
+2026-10-06:
 Completed the P4 documentation backlog.
 
 - Rewrote the deployment guide for the repository's GitHub Pages, Vercel, and Netlify configurations.

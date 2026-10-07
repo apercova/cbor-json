@@ -53,6 +53,7 @@ function App() {
   };
 
   const clearData = () => {
+    fileUploadRef.current?.resetUploadedFile();
     setJsonText(null);
     setDecodeError('');
     setFileName('');

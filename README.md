@@ -87,6 +87,15 @@ npm run cbor2json -- --in sample.cbor
 npm run cbor2json -- --in sample.cbor --fd --tz "-06:00"
 npm run cbor2json -- --in sample.cbor --fd --tz America/Mexico_City
 
+# Preserve all CBOR tags as tagged JSON objects
+npm run cbor2json -- --in sample.cbor --preserve-tags
+
+# Use JavaScript Number conversion for large integers (may round; warns on stderr)
+npm run cbor2json -- --in sample.cbor --large-integer-mode number
+
+# Reject maps containing non-string keys instead of coercing them
+npm run cbor2json -- --in sample.cbor --strict-map-keys
+
 # Show all CLI options and the input size limit
 npm run cbor2json -- --help
 
@@ -114,6 +123,9 @@ cbor2json --in sample.cbor --out output.json
 | `--out <file>` | JSON output file (optional; defaults to current directory with `.json` extension) |
 | `--fd` | Format timestamp tags (0, 1) as ISO 8601 strings; timestamps are epoch seconds by default |
 | `--tz <tz>` | Timezone for ISO timestamp strings (optional; defaults to UTC). Examples: `UTC`, `-06:00`, `+05:30`, `America/Mexico_City` |
+| `--preserve-tags` | Preserve every CBOR tag as a tagged JSON object; overrides timestamp formatting |
+| `--large-integer-mode <exact\|number>` | Choose exact unquoted decimal tokens (default) or JavaScript Number conversion, which may round values |
+| `--strict-map-keys` | Reject non-string map keys instead of coercing them to strings |
 | `--force` | Allow overwriting an existing output file |
 | `--help`, `-h` | Print CLI usage |
 
@@ -135,19 +147,23 @@ cbor2json --in sample.cbor --out output.json
 
 Warnings are logged to the browser console and written to CLI stderr. Exact
 integer tokens preserve the CBOR value in the JSON text, though consumers that
-parse them as JavaScript numbers may round them.
+parse them as JavaScript numbers may round them. The CLI flags in the option
+table expose the same decoder policies as the Settings pane; both interfaces
+use the same defaults.
 
 ### Decoder Settings
 
 Open **Settings** in the header. Settings apply to the next file you decode.
+The CLI equivalents are listed alongside each setting; pass the flags on each
+conversion command.
 
-| Setting | Default | Behavior |
+| Setting | Default | Behavior and CLI option |
 | --- | --- | --- |
-| **Tag representation** | Off | Emit every CBOR tag as `{ "$cbor": "tag", "tag": ..., "value": ... }`. Overrides timestamp formatting and allows otherwise unsupported tags, including tags 4 and 5, to be preserved. Enabling it resets the timezone choice to disabled/UTC. |
-| **Timestamp tags** | Epoch seconds | Choose epoch seconds or ISO 8601 strings for tags 0 and 1. The selector is overridden while Tag representation is on. |
-| **Timezone** | Disabled; UTC when enabled | Available for ISO output. Enable the searchable timezone picker to format the local time and applicable offset. It resets to UTC when toggled or when timestamp format changes. Epoch output is unchanged. |
-| **Large integers** | Exact JSON number | Exact mode emits the integer as an unquoted decimal token. JavaScript Number mode can round it and warns when conversion changes the value. |
-| **Non-string map keys** | Coerce to strings | Compatibility mode stringifies non-string keys. Strict mode rejects any map containing one. Duplicate keys and collisions after coercion are rejected in either mode. |
+| **Tag representation** | Off | Emit every CBOR tag as `{ "$cbor": "tag", "tag": ..., "value": ... }`. Overrides timestamp formatting and allows otherwise unsupported tags, including tags 4 and 5, to be preserved. Enabling it resets the timezone choice to disabled/UTC. CLI: `--preserve-tags`. |
+| **Timestamp tags** | Epoch seconds | Choose epoch seconds or ISO 8601 strings for tags 0 and 1. The selector is overridden while Tag representation is on. CLI: `--fd` selects ISO. |
+| **Timezone** | Disabled; UTC when enabled | Available for ISO output. Enable the searchable timezone picker to format the local time and applicable offset. It resets to UTC when toggled or when timestamp format changes. Epoch output is unchanged. CLI: `--tz <timezone>` (used with `--fd`). |
+| **Large integers** | Exact JSON number | Exact mode emits the integer as an unquoted decimal token. JavaScript Number mode can round it and warns when conversion changes the value. CLI: `--large-integer-mode exact\|number`. |
+| **Non-string map keys** | Coerce to strings | Compatibility mode stringifies non-string keys. Strict mode rejects any map containing one. Duplicate keys and collisions after coercion are rejected in either mode. CLI: `--strict-map-keys` enables strict mode. |
 
 Byte strings remain base64 objects and negative zero remains an explicit float
 object in all settings modes.

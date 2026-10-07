@@ -3,12 +3,16 @@ const { act } = React;
 const { createRoot } = require('react-dom/client');
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 const mockOpenFileDialog = jest.fn();
+const mockResetUploadedFile = jest.fn();
 
 jest.mock('file-saver', () => ({ saveAs: jest.fn() }));
 jest.mock('./components/FileUploadPanel', () => {
   const ReactModule = require('react');
   return ReactModule.forwardRef((props, ref) => {
-    ReactModule.useImperativeHandle(ref, () => ({ openFileDialog: mockOpenFileDialog }));
+    ReactModule.useImperativeHandle(ref, () => ({
+      openFileDialog: mockOpenFileDialog,
+      resetUploadedFile: mockResetUploadedFile,
+    }));
     return ReactModule.createElement('div', null,
       ReactModule.createElement('button', {
         'data-testid': 'convert',
@@ -55,6 +59,7 @@ it('shows file actions only when their output state is available', () => {
   expect(saveAs).toHaveBeenCalledWith(expect.any(Blob), 'sample.json');
 
   act(() => container.querySelector('[aria-label="Clear output"]').click());
+  expect(mockResetUploadedFile).toHaveBeenCalledTimes(1);
   expect(container.querySelector('[aria-label="Save JSON"]')).toBeNull();
   expect(container.querySelector('[aria-label="Open file"]')).not.toBeNull();
   expect(container.querySelector('[aria-label="Clear output"]')).toBeNull();
@@ -62,6 +67,7 @@ it('shows file actions only when their output state is available', () => {
   act(() => container.querySelector('[data-testid="convert"]').click());
   act(() => container.querySelector('[aria-label="Open file"]').click());
   expect(mockOpenFileDialog).toHaveBeenCalledTimes(1);
+  expect(mockResetUploadedFile).toHaveBeenCalledTimes(2);
   expect(container.querySelector('[aria-label="Save JSON"]')).toBeNull();
   act(() => root.unmount());
 });

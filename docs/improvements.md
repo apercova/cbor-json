@@ -75,6 +75,10 @@ numbers by default. CLI `--fd` enables ISO 8601 strings with optional timezone
 formatting through `--tz`; invalid timezones fail. The shared decoder can
 preserve timestamp tags as explicit JSON objects in tagged mode.
 
+CLI `--preserve-tags`, `--large-integer-mode exact|number`, and
+`--strict-map-keys` expose the same tag, integer, and map-key policies as the
+browser settings pane. Defaults match across both interfaces.
+
 The browser calls the same decoder inside a Web Worker. RFC 8949 Appendix A
 vectors and decoder policy cases live in `fixtures/` and
 `src/utils/decodeCbor.node-test.mjs`. The unused Python `requirements.txt` and

@@ -16,6 +16,7 @@ interface FileUploadPanelProps {
 
 export interface FileUploadPanelRef {
   openFileDialog: () => void;
+  resetUploadedFile: () => void;
 }
 
 const FileUploadPanel = forwardRef<FileUploadPanelRef, FileUploadPanelProps>(({ onCborConverted, onFileProcessingStart, onFileProcessingError, onError, decodeOptions, isProcessing = false, hidden = false }, ref) => {
@@ -32,7 +33,11 @@ const FileUploadPanel = forwardRef<FileUploadPanelRef, FileUploadPanelProps>(({ 
 
   // Expose openFileDialog to parent components
   useImperativeHandle(ref, () => ({
-    openFileDialog
+    openFileDialog,
+    resetUploadedFile: () => {
+      setUploadedFileName('');
+      setIsDragOver(false);
+    },
   }));
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -60,6 +65,11 @@ const FileUploadPanel = forwardRef<FileUploadPanelRef, FileUploadPanelProps>(({ 
     handleFile(file);
   };
 
+  const handleUploadAreaClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    const target = event.target as HTMLElement;
+    if (!isProcessing && !target.closest('button, input')) openFileDialog();
+  };
+
   return (
     <div className="panel" hidden={hidden}>
       <div
@@ -67,6 +77,7 @@ const FileUploadPanel = forwardRef<FileUploadPanelRef, FileUploadPanelProps>(({ 
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
+        onClick={handleUploadAreaClick}
       >
         <input {...fileInputProps} />
         
@@ -82,7 +93,10 @@ const FileUploadPanel = forwardRef<FileUploadPanelRef, FileUploadPanelProps>(({ 
               className="upload-trigger"
               type="button"
               disabled={isProcessing}
-              onClick={openFileDialog}
+              onClick={(event) => {
+                event.stopPropagation();
+                openFileDialog();
+              }}
             >choose a file</button></p>
             <div className="file-types">
               Supported: .cbor, .bin files
