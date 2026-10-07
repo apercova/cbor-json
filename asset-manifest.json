@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/cbor-json/static/css/main.1f9141e6.css",
-    "main.js": "/cbor-json/static/js/main.1921f7a8.js",
-    "static/js/193.bd768f9d.chunk.js": "/cbor-json/static/js/193.bd768f9d.chunk.js",
+    "main.css": "/cbor-json/static/css/main.293833e5.css",
+    "main.js": "/cbor-json/static/js/main.6ccda5f4.js",
+    "static/js/193.502ad9ad.chunk.js": "/cbor-json/static/js/193.502ad9ad.chunk.js",
     "static/js/475.944b13f1.chunk.js": "/cbor-json/static/js/475.944b13f1.chunk.js",
     "index.html": "/cbor-json/index.html"
   },
   "entrypoints": [
-    "static/css/main.1f9141e6.css",
-    "static/js/main.1921f7a8.js"
+    "static/css/main.293833e5.css",
+    "static/js/main.6ccda5f4.js"
   ]
 }
