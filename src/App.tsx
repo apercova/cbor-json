@@ -4,20 +4,26 @@ import FileUploadPanel, { FileUploadPanelRef } from './components/FileUploadPane
 import JsonDisplayPanel from './components/JsonDisplayPanel';
 
 function App() {
-  const [jsonData, setJsonData] = useState<any>(null);
+  const [jsonText, setJsonText] = useState<string | null>(null);
+  const [decodeWarnings, setDecodeWarnings] = useState<string[]>([]);
+  const [decodeError, setDecodeError] = useState<string>('');
   const [fileName, setFileName] = useState<string>('');
   const [isProcessingFile, setIsProcessingFile] = useState<boolean>(false);
   const fileUploadRef = useRef<FileUploadPanelRef>(null);
 
-  const handleCborConverted = (convertedData: any, originalFileName: string) => {
-    setJsonData(convertedData);
+  const handleCborConverted = (convertedJson: string, warnings: string[], originalFileName: string) => {
+    setJsonText(convertedJson);
+    setDecodeWarnings(warnings);
+    setDecodeError('');
     setFileName(originalFileName);
     setIsProcessingFile(false);
   };
 
   const handleFileProcessingStart = () => {
     setIsProcessingFile(true);
-    setJsonData(null);
+    setJsonText(null);
+    setDecodeWarnings([]);
+    setDecodeError('');
     setFileName('');
   };
 
@@ -26,13 +32,17 @@ function App() {
   };
 
   const handleClearData = () => {
-    setJsonData(null);
+    setJsonText(null);
+    setDecodeWarnings([]);
+    setDecodeError('');
     setFileName('');
     setIsProcessingFile(false);
   };
 
   const handleNewFile = () => {
-    setJsonData(null);
+    setJsonText(null);
+    setDecodeWarnings([]);
+    setDecodeError('');
     setFileName('');
     setIsProcessingFile(false);
     // Directly call the file dialog when upload panel is shown
@@ -54,20 +64,23 @@ function App() {
       <div className="main-container">
         <div className="panel-container">
           {/* Show upload panel when no data or processing */}
-          {(!jsonData || isProcessingFile) && (
+          {((!jsonText && !decodeError) || isProcessingFile) && (
             <FileUploadPanel 
               ref={fileUploadRef}
               onCborConverted={handleCborConverted}
               onFileProcessingStart={handleFileProcessingStart}
               onFileProcessingError={handleFileProcessingError}
+              onError={setDecodeError}
               isProcessing={isProcessingFile}
             />
           )}
           
-          {/* Show JSON panel only when data is available (after successful processing) */}
-          {jsonData && !isProcessingFile && (
+          {/* Show the result panel for decoded JSON or a decode error. */}
+          {(jsonText || decodeError) && !isProcessingFile && (
             <JsonDisplayPanel 
-              jsonData={jsonData} 
+              jsonText={jsonText || ''}
+              warnings={decodeWarnings}
+              error={decodeError}
               fileName={fileName}
               onClearData={handleClearData}
               onNewFile={handleNewFile}

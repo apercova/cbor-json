@@ -1,5 +1,15 @@
 # Changelog
 
+2026-10-06:
+Added CBOR decoder improvements and aligned output with compatibility and precision requirements.
+
+- Replaced `cbor-js` with the shared `cborg` decoder for browser and CLI, including RFC vectors, depth/input limits, and safer CBOR-to-JSON handling.
+- Timestamp tags now output epoch-second numbers by default, with ISO formatting and tagged preservation available through decoder options.
+- Large native integers default to exact unquoted JSON number tokens; optional JavaScript `Number` conversion warns when it changes a value.
+- Non-string map keys coerce to strings by default, with strict rejection available through decoder options.
+- Left-aligned warnings and moved decode errors into the output panel beneath warnings.
+- Updated README and P4 backlog; type-check, lint, and all tests pass.
+
 2026-10-06: 
 Improved file handling and security across the browser app and CLI.
 

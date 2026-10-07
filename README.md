@@ -79,10 +79,10 @@ npm run cbor2json -- --in sample.cbor --out output.json
 # Output to current directory (saves as <input-name>.json)
 npm run cbor2json -- --in sample.cbor
 
-# Format CBOR timestamps (tags 0, 1) as ISO 8601 strings
-npm run cbor2json -- --in sample.cbor --fd --tz UTC
+# CBOR timestamps (tags 0, 1) are epoch seconds by default
+npm run cbor2json -- --in sample.cbor
 
-# Format timestamps in a specific timezone
+# Format timestamps as ISO 8601 strings in a specific timezone
 npm run cbor2json -- --in sample.cbor --fd --tz "-06:00"
 npm run cbor2json -- --in sample.cbor --fd --tz America/Mexico_City
 
@@ -111,10 +111,35 @@ cbor2json --in sample.cbor --out output.json
 |------|-------------|
 | `--in <file>` | CBOR input file (required) |
 | `--out <file>` | JSON output file (optional; defaults to current directory with `.json` extension) |
-| `--fd` | Format CBOR timestamp tags (0, 1) as ISO 8601 strings |
-| `--tz <tz>` | Timezone for formatted dates (optional; defaults to UTC). Examples: `UTC`, `-06:00`, `+05:30`, `America/Mexico_City` |
+| `--fd` | Format timestamp tags (0, 1) as ISO 8601 strings; timestamps are epoch seconds by default |
+| `--tz <tz>` | Timezone for ISO timestamp strings (optional; defaults to UTC). Examples: `UTC`, `-06:00`, `+05:30`, `America/Mexico_City` |
 | `--force` | Allow overwriting an existing output file |
 | `--help`, `-h` | Print CLI usage |
+
+### CBOR Conversion Policy
+
+- Arrays, text strings, booleans, null, and finite JSON-range numbers are
+  represented directly in JSON. Map keys are coerced to strings by default.
+- Byte strings use `{ "$cbor": "bytes", "base64": "..." }` and produce a
+  warning. CBOR tags, including bignum tags 2 and 3, remain explicit tagged
+  objects and produce warnings. Large native CBOR integers are written as
+  exact unquoted decimal JSON number tokens by default. Consumers using
+  JavaScript numbers may round them when parsing. The shared decoder also offers
+  a Number mode that matches the former `cbor-js` behavior and warns if
+  conversion changes the integer. Negative zero uses an explicit tagged float
+  form.
+- Timestamp tags 0 and 1 become epoch-second JSON numbers by default. Tag 0
+  date strings are converted to epoch seconds; fractional seconds are retained
+  to millisecond precision. The CLI `--fd` option selects ISO 8601 strings,
+  using UTC unless another timezone is selected with `--tz`. The shared decoder
+  can also preserve a timestamp as an explicit tagged JSON object. An invalid
+  timezone is an error in ISO mode.
+- Non-string map keys are coerced to strings by default for compatibility;
+  collisions after coercion are rejected. Strict map-key mode rejects any
+  non-string key. Duplicate string keys, undefined, non-finite floats, decimal
+  and bigfloat tags 4 and 5, and unknown tags are rejected with a clear error.
+- Browser decoding runs in a Web Worker. Both interfaces enforce a 100 MiB
+  input cap and a maximum nesting depth of 128.
 
 #### ✅ Installation Verification
 If `npm install` completed successfully, you should have:
@@ -185,8 +210,7 @@ npx serve -s build
 - **🏗️ Create React App** 5.0.1 - Zero-config build tooling
 
 ### CBOR Processing
-- **🔢 cbor-js** 0.1.0 - Browser-compatible CBOR decoder
-- **📝 @types/cbor-js** 0.1.1 - TypeScript declarations
+- **🔢 cborg** - Strict CBOR decoder shared by the browser and CLI
 
 ### Code Editor
 - **⚡ @uiw/react-codemirror** 4.25.1 - Professional code editor component
@@ -227,7 +251,8 @@ src/
 ├── hooks/                    # Custom React hooks
 │   └── useFileHandler.ts     # 🔄 Reusable file processing logic
 ├── utils/                    # Utility functions
-│   ├── cborProcessor.ts      # 🔢 CBOR to JSON conversion
+│   ├── cborProcessor.ts      # 🧵 Worker-based browser decoder
+│   ├── decodeCbor.mjs        # 🔢 Shared CBOR-to-JSON policy and decoder
 │   ├── downloadName.ts       # 🧹 Safe JSON download filenames
 │   └── editorConfig.ts       # ⚙️ CodeMirror configuration
 ├── constants/                # Application constants
@@ -277,7 +302,7 @@ headers.
 ```bash
 # Development
 npm start          # Start development server
-npm test -- --watchAll=false  # Run tests once
+npm test            # Run the full test suite once
 npm run type-check  # Check TypeScript
 npm run lint        # Lint source files
 npm run build      # Create production build
@@ -296,6 +321,7 @@ npm run deploy     # Deploy to GitHub Pages
 - **📘 TypeScript** - Static type checking for the TypeScript application code
 - **🔍 ESLint** - Code linting with React and TypeScript rules
 - **🧪 Jest tests** - Input limits, download names, CLI safety, and CSP generation
+- **📚 RFC fixtures** - Decoder coverage using RFC 8949 Appendix A vectors
 - **🎯 DRY Principles** - Reusable components, hooks, and utilities
 - **⚛️ Modern React Patterns** - Hooks, forwardRef, useImperativeHandle
 - **🏗️ Component Architecture** - Modular, maintainable code structure
@@ -363,7 +389,7 @@ No warranty provided - use at your own risk
 ## 🙏 Acknowledgments
 
 ### 🚀 Built With
-- **[cbor-js](https://www.npmjs.com/package/cbor-js)** - Browser-compatible CBOR decoding
+- **[cborg](https://github.com/rvagg/cborg)** - Strict CBOR decoding shared by the browser and CLI
 - **[CodeMirror 6](https://codemirror.net/)** - Professional code editing experience
 - **[React](https://reactjs.org/)** - UI library for building interactive interfaces
 - **[Create React App](https://create-react-app.dev/)** - Zero-config React build tooling

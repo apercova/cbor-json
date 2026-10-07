@@ -9,14 +9,18 @@ import { jsonDownloadName } from '../utils/downloadName';
 import './JsonDisplayPanel.css';
 
 interface JsonDisplayPanelProps {
-  jsonData: any;
+  jsonText: string;
+  warnings: string[];
+  error: string;
   fileName: string;
   onClearData: () => void;
   onNewFile: () => void;
 }
 
-const JsonDisplayPanel: React.FC<JsonDisplayPanelProps> = ({ 
-  jsonData, 
+const JsonDisplayPanel: React.FC<JsonDisplayPanelProps> = ({
+  jsonText,
+  warnings,
+  error,
   fileName, 
   onClearData,
   onNewFile
@@ -25,15 +29,14 @@ const JsonDisplayPanel: React.FC<JsonDisplayPanelProps> = ({
   const [isRenderingJson, setIsRenderingJson] = useState<boolean>(false);
 
   useEffect(() => {
-    if (jsonData) {
+    if (jsonText) {
       setIsRenderingJson(true);
       setFormattedJson('');
       
       // Use setTimeout to allow UI update for large files
       setTimeout(() => {
         try {
-          const formatted = JSON.stringify(jsonData, null, 2);
-          setFormattedJson(formatted);
+          setFormattedJson(jsonText);
         } catch (error) {
           setFormattedJson('Error formatting JSON data');
         } finally {
@@ -44,7 +47,7 @@ const JsonDisplayPanel: React.FC<JsonDisplayPanelProps> = ({
       setFormattedJson('');
       setIsRenderingJson(false);
     }
-  }, [jsonData]);
+  }, [jsonText]);
 
   const handleSaveJson = () => {
     if (formattedJson) {
@@ -64,7 +67,7 @@ const JsonDisplayPanel: React.FC<JsonDisplayPanelProps> = ({
     <div className="panel">
       <div className="panel-header">
         <div className="header-left">
-          <h2>📄 JSON Output</h2>
+          <h2>{error && !jsonText ? '⚠️ CBOR Decode Error' : '📄 JSON Output'}</h2>
           {formattedJson && (
             <div className="line-counter">
               <span className="line-count">{formattedJson.split('\n').length.toLocaleString()} lines</span>
@@ -76,15 +79,15 @@ const JsonDisplayPanel: React.FC<JsonDisplayPanelProps> = ({
             </div>
           )}
         </div>
-        {jsonData && (
+        {(jsonText || error) && (
           <div className="panel-actions">
-            <button 
+            {jsonText && <button
               className="action-btn" 
               onClick={handleSaveJson}
               title="Save to disk"
             >
               💾 Save
-            </button>
+            </button>}
             <button 
               className="action-btn" 
               onClick={onNewFile}
@@ -92,13 +95,13 @@ const JsonDisplayPanel: React.FC<JsonDisplayPanelProps> = ({
             >
               📁 New
             </button>
-            <button 
+            {jsonText && <button
               className="action-btn" 
               onClick={onClearData}
               title="Close editor"
             >
               ✖️ Clear
-            </button>
+            </button>}
           </div>
         )}
       </div>
@@ -109,8 +112,22 @@ const JsonDisplayPanel: React.FC<JsonDisplayPanelProps> = ({
         />
       )}
 
-      <div className="json-container">
-        {formattedJson ? (
+      {warnings.length > 0 && (
+        <div className="decode-warnings" role="status">
+          <strong>Decoded with warnings:</strong>
+          <ul>{warnings.map((warning, index) => <li key={`${index}-${warning}`}>{warning}</li>)}</ul>
+        </div>
+      )}
+
+      {error && (
+        <div className="decode-error" role="alert">
+          <strong>Could not decode CBOR:</strong>
+          <p>{error}</p>
+        </div>
+      )}
+
+      {formattedJson && (
+        <div className="json-container">
           <div className="json-editor-wrapper">
             <CodeMirror
               value={formattedJson}
@@ -121,12 +138,8 @@ const JsonDisplayPanel: React.FC<JsonDisplayPanelProps> = ({
               className="json-editor"
             />
           </div>
-        ) : (
-          <div className="centered-loading">
-            {/* Panel only shows when jsonData exists, so this shouldn't happen */}
-          </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

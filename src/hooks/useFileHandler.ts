@@ -4,7 +4,7 @@ import { SUPPORTED_FILE_EXTENSIONS } from '../constants';
 import { fileTooLargeMessage } from '../constants/limits';
 
 interface UseFileHandlerProps {
-  onCborConverted: (data: any, fileName: string) => void;
+  onCborConverted: (jsonText: string, warnings: string[], fileName: string) => void;
   onFileProcessingStart: () => void;
   onFileProcessingError: () => void;
   onError?: (error: string) => void;
@@ -33,8 +33,8 @@ export const useFileHandler = ({
     try {
       const result = await processCborFile(file);
       
-      if (result.success && result.data) {
-        onCborConverted(result.data, file.name);
+      if (result.success) {
+        onCborConverted(result.jsonText, result.warnings, file.name);
       } else {
         if (onError) onError(result.error || 'Unknown error');
         onFileProcessingError();

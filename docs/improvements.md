@@ -1,7 +1,8 @@
 # Improvements
 
-Assessment of the application and its improvement backlog. P1 safety changes
-are implemented on this branch; P0 and P2–P4 work remains open unless noted.
+Assessment of the application and its improvement backlog. P0 decoder
+correctness and P1 file-safety changes are implemented on this branch; P2–P4
+work remains open unless noted.
 
 Audit date: 2026-10-06. `npm audit` on the lockfile: 3 critical, 80 high,
 15 moderate, 5 low (103).
@@ -25,97 +26,65 @@ by leaving CRA, not by `npm audit fix --force`.
 | Path | Role | Notes |
 | --- | --- | --- |
 | `src/index.tsx` | CRA entry | StrictMode only. No error boundary. |
-| `src/App.tsx` | Screen switch | Upload panel or JSON panel. State is `jsonData: any`, a filename, and a processing flag. |
+| `src/App.tsx` | Screen switch | Upload panel or JSON panel. State is formatted JSON text, decoder warnings, a filename, and a processing flag. |
 | `src/components/FileUploadPanel.tsx` | Drop/click upload | Clickable `div`. No keyboard path. Hidden file input. |
 | `src/hooks/useFileHandler.ts` | File input wiring | Rejects files over 100 MiB before `arrayBuffer()` and resets the input after selection. No extension check. |
-| `src/utils/cborProcessor.ts` | Browser decode | `cbor-js` then `JSON.parse(JSON.stringify(...))`. |
+| `src/utils/cborProcessor.ts` | Browser decode | Reads the file and transfers its buffer to a Web Worker. |
+| `src/utils/decodeCbor.mjs` | Shared decoder | `cborg`, bounded depth, JSON conversion policy, stable errors, and date-tag formatting used by browser worker and CLI. |
 | `src/components/JsonDisplayPanel.tsx` | CodeMirror view + save | "Large file" means formatted string length > 100000, not file bytes. |
 | `src/utils/editorConfig.ts` | Editor setup | Escape shortcut does nothing. Imports `@codemirror/state`, which is not a direct dependency. |
 | `src/constants/index.ts` | Three constants | Threshold comment says 100KB. The value is a character count. |
-| `bin/cbor2json.js` | CLI | Second decoder. Adds `--fd` / `--tz`, a 100 MiB pre-read size check, required `--in`, strict flags, `--help`, and guarded overwrites. Not typechecked (`tsconfig` includes only `src`). |
+| `bin/cbor2json.js` | CLI | Uses the shared decoder with epoch-second timestamp numbers by default and optional ISO output with `--fd` / `--tz`; includes a 100 MiB pre-read size check, required `--in`, strict flags, `--help`, and guarded overwrites. |
 | `public/index.html` | Shell | References `favicon.ico`, which is not in `public/`. Production CSP is injected at build time; host header files set CSP, Referrer-Policy, and X-Content-Type-Options. |
-| `requirements.txt` | `cbor2>=5.4.0` | Python package. Nothing in the repo imports it. |
+| `fixtures/rfc8949-appendix-a.json` | Decoder fixtures | RFC 8949 Appendix A byte vectors and expected JSON values. |
 | `docs/DEPLOY.md` | Host guide | Repo name `cbor_json`, missing `CONTRIBUTING.md`, demo URLs, service worker that does not exist. |
-| Tests, CI | Partial / absent | P1 size, download-name, CLI safety, and CSP metadata tests exist. There is no CI. `.gitignore` ignores `*.test.cbor`. |
+| Tests, CI | Partial / absent | RFC vector, decoder policy, P1 safety, and CSP metadata tests exist. There is no CI. |
 
-Two pipelines decode CBOR and do not share code:
+The browser and CLI use one decoder:
 
 ```
-browser: File → cborProcessor.ts → cbor-js → JSON.parse(JSON.stringify) → CodeMirror
-CLI:     --in  → bin/cbor2json.js → cbor-js (+ optional date tags) → write JSON
+browser: File → cborProcessor.ts → Web Worker → decodeCbor.mjs → CodeMirror
+CLI:     --in  → bin/cbor2json.js → decodeCbor.mjs (+ --fd / --tz) → write JSON
 ```
 
-The UI has no `--fd` / `--tz`. Error text is copied in both places and matched
-by substring (`invalid`, `unexpected end`, `not supported`).
+The UI uses the shared decoder's default epoch-second timestamp policy. Decoder
+errors have stable codes; warnings appear with the converted JSON and on CLI
+stderr.
 
-## Doc claims the tree does not implement
+## Remaining documentation gaps
 
-- A Content-Security-Policy. `public/index.html` has none.
-- WCAG 2.1 AA. There are no `aria-*`, `role`, or keyboard handlers. The upload
-  target is a `div` with `onClick`. The file input is `display: none`.
-- Lazy-loaded components. `App.tsx` imports both panels statically.
-- A measured bundle under 200KB, 50MB files, Lighthouse 95, or load time under
-  2s. Decode runs on the main thread, then the result is cloned and
-  pretty-printed again.
-- Full type safety. `strict` is on, and the decoded value is `any` in every
-  TypeScript site that holds it.
-- The deployment link `DEPLOY.md` from the README root. The file is
-  `docs/DEPLOY.md`. Issues and the fork guide use `cbor_json`. This repo is
-  `cbor-json`.
+- WCAG 2.1 AA conformance has not been established. The upload target is a
+  clickable `div` and the file input is visually hidden.
+- Components are not lazy-loaded; `App.tsx` imports both panels statically.
+- `docs/DEPLOY.md` still contains stale host instructions, service-worker
+  directions, and repository links. The README links to the correct path.
 
-## P0 — Decoder correctness
+## P0 — Decoder correctness (implemented on this branch)
 
-`cbor-js@0.1.0` (lockfile) is the 2015 package. It is unmaintained and covers
-an old slice of RFC 7049.
+`cborg` replaces `cbor-js` behind the shared `decodeCbor(bytes, options)`
+function. The decoder copies input bytes, preflights nesting (maximum 128),
+and enforces the shared 100 MiB limit. It rejects duplicate map keys,
+including collisions after non-string-key coercion, undefined,
+non-finite numbers, decimal/bigfloat tags, and unknown tags. Non-string map
+keys are coerced to strings by default for compatibility; strict mode rejects
+them. Byte strings and tags are represented explicitly with warnings; large
+native integers are emitted as exact unquoted decimal JSON number tokens by
+default. `largeIntegerMode: 'number'` opts into JavaScript number conversion
+and warns if conversion changes the integer. `__proto__` remains a data key on a
+null-prototype object during serialization. Timestamp tags become epoch-second
+numbers by default. CLI `--fd` enables ISO 8601 strings with optional timezone
+formatting through `--tz`; invalid timezones fail. The shared decoder can
+preserve timestamp tags as explicit JSON objects in tagged mode.
 
-`JSON.parse(JSON.stringify(decoded))` then drops or corrupts common CBOR:
+The browser calls the same decoder inside a Web Worker. RFC 8949 Appendix A
+vectors and decoder policy cases live in `fixtures/` and
+`src/utils/decodeCbor.node-test.mjs`. The unused Python `requirements.txt` and
+`cbor-js` dependency have been removed.
 
-- Byte strings (major type 2) become `{}` because `cbor-js` returns an
-  `ArrayBuffer`.
-- `NaN` and `Infinity` become `null`.
-- `BigInt` throws. Tags 2 and 3 (bignums) are not preserved.
-- Tags other than the CLI's optional 0 and 1 are stripped.
-- Map keys that are not strings are coerced. Duplicate keys keep the last
-  value with no warning.
-- A map key `__proto__` changes that object's prototype. Today the page only
-  displays the result. A later deep-merge into app state would turn this into
-  prototype pollution.
-
-`CBOR.decode(uint8Array.buffer)` decodes the whole underlying `ArrayBuffer`,
-ignoring `byteOffset` and `byteLength`. `File.arrayBuffer()` and
-`fs.readFileSync` currently allocate a dedicated buffer, so this is latent.
-A sliced or pooled `Buffer` would decode neighboring bytes. Copy into a fresh
-`Uint8Array` before decode.
-
-There is no max size. Decode is synchronous, then the value is cloned and
-pretty-printed. A large or deeply nested file blocks the tab. The README line
-about 50MB files is not backed by a limit or a test.
-
-The CLI and the UI do not share this function. Date formatting exists only in
-`bin/cbor2json.js`. An invalid `--tz` is caught and the timestamp is written
-as UTC with no error, so the file looks converted in the requested zone.
-
-### Target
-
-One pure function, used by the UI and the CLI:
-
-`decodeCbor(bytes: Uint8Array, options) -> { jsonText, warnings }`
-
-- Copy bytes before decode.
-- Represent byte strings as base64 or as an explicit tagged form, and record
-  a warning. Do not emit `{}`.
-- Preserve or explicitly reject bignums, decimals, and unknown tags. Warnings
-  go to stderr on the CLI and into the error panel in the UI.
-- Cap input size and nesting. Refuse with a clear message.
-- Run the browser decode in a worker so the tab stays responsive.
-- Apply `--fd` / `--tz` in the shared function. Unknown timezones are errors.
-- Add RFC 8949 appendix vectors as fixtures. Stop gitignoring `*.test.cbor`,
-  or store fixtures under `fixtures/` with a different name.
-
-Replace `cbor-js` only behind that function and those vectors. Candidates to
-evaluate: `cborg`, `cbor-x`. Pick with a short spike, not a rewrite.
-`requirements.txt` (`cbor2`) is unused Python. Delete it when the decoder
-decision is recorded.
+`cborg` was selected in a focused integration spike: its byte-array support,
+custom tag callbacks, typed map decoding, duplicate-key rejection, and strict
+unknown-tag errors fit this converter's explicit JSON policy. No throughput
+benchmark was run; the goal was correctness and predictable rejection.
 
 ## P1 — Safety around the file (implemented on this branch)
 
@@ -138,25 +107,22 @@ decision is recorded.
 
 P1 implementation files include `src/constants/limits.js`,
 `src/utils/downloadName.ts`, `scripts/inject-csp.js`, `vercel.json`,
-`public/_headers`, and `src/cli.safety.test.ts`. Production build output is
+`public/_headers`, and `src/cli.safety.test.js`. Production build output is
 checked for inline scripts before the CSP is inserted. The CSP permits inline
 styles for the current input styling and CodeMirror behavior.
 
 ## P2 — Engineering hygiene
 
-- Tests: decoder vectors, CLI args (missing `--in`, bad timezone, byte
-  string), and one UI test that an error string renders. There are zero test
-  files today.
+- Tests: decoder vectors and CLI safety coverage exist. Add the planned UI
+  error-render test and CI.
 - CI on pull request: `npm ci`, `npm run type-check`, `npm run lint`,
-  `npm test -- --watchAll=false`. Node 22.
+  `npm test`. Node 22.
 - `engines` says `node >= 16`. Node 16 and 18 are end of life. Set `>=22`.
 - Move `@types/*` and `typescript` to `devDependencies`. Add
   `@codemirror/state` as a direct dependency. `editorConfig.ts` imports it
   through a transitive package.
-- Replace `any` with a `CborJson` type (JSON value plus the explicit binary
-  form you choose).
-- Delete the duplicated error-message switch after the shared decoder returns
-  stable error codes.
+- Finish replacing remaining application `any` types with the JSON output
+  type.
 - `tsconfig` `target: es5` fights the browsers listed in the README
   (Chrome 88+). Raising it is a build change. Do it with the toolchain move.
 - Plan the move off Create React App. `react-scripts@5` is unmaintained and
@@ -195,16 +161,25 @@ describe this program.
   and it links demo hosts that are not this project.
 - State CBOR types the converter preserves, types it rewrites, and types it
   rejects.
+- Add a settings pane toggle for timestamp representation: epoch-second number
+  (the default), ISO 8601 string, or a nested JSON object that preserves the
+  CBOR tag and value.
+- Add a settings pane toggle for map-key handling: coerce non-string keys to
+  strings (the default) or enable strict mode, which rejects those keys.
+- Add a settings pane toggle for large integer output: exact decimal JSON
+  number tokens (the default) or JavaScript Number conversion, with a warning
+  whenever that mode rounds an integer.
 
 ## Suggested order
 
-1. Shared decoder, byte-string policy, fixtures, size cap.
-2. Wire the UI and the CLI through it. Delete `requirements.txt`.
-3. CI and the type/`any` cleanup.
-4. Accessibility and the file-dialog bugs.
+1. [x] Shared decoder, byte-string policy, RFC fixtures, and size/depth caps.
+2. [x] Wire UI and CLI through the decoder, run browser decoding in a worker,
+   and remove unused Python/legacy decoder dependencies.
+3. CI and remaining type cleanup.
+4. Accessibility and file-dialog behavior.
 5. Leave Create React App. Re-run `npm audit` and keep the production
    dependency set separate from the dev-server set.
-6. Rewrite README and trim `docs/DEPLOY.md`.
+6. Trim `docs/DEPLOY.md` and finish documentation cleanup.
 
 ## Do not do in the first pass
 
