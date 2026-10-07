@@ -4,6 +4,8 @@ A browser application and local CLI for converting CBOR (Concise Binary Object R
 
 ![React](https://img.shields.io/badge/React-18.2.0-blue?logo=react) ![TypeScript](https://img.shields.io/badge/TypeScript-4.9.0-blue?logo=typescript) ![License](https://img.shields.io/badge/License-MIT-green)
 
+<img width="960" height="827" alt="cbor-json" src="https://github.com/user-attachments/assets/8a2dfdd4-10ea-4382-a84e-a0f585644fa8" />
+
 ## ✨ Features
 
 ### 🎯 Core Functionality
