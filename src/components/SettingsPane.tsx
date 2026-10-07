@@ -1,9 +1,8 @@
 import React from 'react';
-import type { DecodeCborOptions } from '../utils/decodeCbor.mjs';
 import TimezoneSelector from './TimezoneSelector';
 import './SettingsPane.css';
 
-export interface DecoderSettings extends DecodeCborOptions {
+export interface DecoderSettings {
   preserveTags: boolean;
   timestampFormat: 'epoch' | 'iso';
   timezoneEnabled: boolean;

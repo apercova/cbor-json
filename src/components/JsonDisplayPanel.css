@@ -57,33 +57,6 @@
   font-weight: 500;
 }
 
-.panel-actions {
-  display: flex;
-  gap: 0.25rem; /* More compact spacing */
-}
-
-.action-btn {
-  padding: 0.35rem 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  background: white;
-  color: #333;
-  cursor: pointer;
-  font-size: 0.85rem;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  white-space: nowrap;
-}
-
-.action-btn:hover {
-  background: #f8f9fa;
-  border-color: #adb5bd;
-  transform: translateY(-1px);
-}
-
 .json-container {
   flex: 1;
   display: flex;
@@ -301,17 +274,6 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 0.5rem;
-  }
-  
-  .panel-actions {
-    justify-content: center;
-  }
-  
-  .action-btn {
-    flex: 1;
-    justify-content: center;
-    padding: 0.3rem 0.4rem;
-    font-size: 0.75rem;
   }
   
   .line-count {

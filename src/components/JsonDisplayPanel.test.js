@@ -17,9 +17,6 @@ it('renders decode errors without the former warning banner text', () => {
     root.render(React.createElement(JsonDisplayPanel, {
       jsonText: '',
       error: 'A decoder error',
-      fileName: 'sample.cbor',
-      onClearData: () => undefined,
-      onNewFile: () => undefined,
     }));
   });
 

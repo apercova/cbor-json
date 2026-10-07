@@ -94,20 +94,6 @@ const FileUploadPanel = forwardRef<FileUploadPanelRef, FileUploadPanelProps>(({ 
           </div>
         </div>
       )}
-
-      <div className="library-references">
-        <h4>Powered by:</h4>
-        <div className="library-links">
-          <div className="library-item">
-            <span><strong>CBOR Processing:</strong> <a href="https://github.com/rvagg/cborg" target="_blank" rel="noopener noreferrer">cborg</a></span>
-            <span className="library-description">Strict CBOR decoding</span>
-          </div>
-          <div className="library-item">
-            <span><strong>Code Editor:</strong> <a href="https://codemirror.net/" target="_blank" rel="noopener noreferrer">CodeMirror 6</a></span>
-            <span className="library-description">Professional code editing with JSON support</span>
-          </div>
-        </div>
-      </div>
     </div>
   );
 });

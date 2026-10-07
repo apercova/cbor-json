@@ -1,27 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { saveAs } from 'file-saver';
 import CodeMirror from '@uiw/react-codemirror';
 
 import LoadingIndicator from './LoadingIndicator';
 import { createEditorExtensions, editorBasicSetup } from '../utils/editorConfig';
 import { LARGE_FILE_THRESHOLD, JSON_FORMATTING_DELAY } from '../constants';
-import { jsonDownloadName } from '../utils/downloadName';
 import './JsonDisplayPanel.css';
 
 interface JsonDisplayPanelProps {
   jsonText: string;
   error: string;
-  fileName: string;
-  onClearData: () => void;
-  onNewFile: () => void;
 }
 
 const JsonDisplayPanel: React.FC<JsonDisplayPanelProps> = ({
   jsonText,
   error,
-  fileName, 
-  onClearData,
-  onNewFile
 }) => {
   const [formattedJson, setFormattedJson] = useState<string>('');
   const [isRenderingJson, setIsRenderingJson] = useState<boolean>(false);
@@ -47,17 +39,6 @@ const JsonDisplayPanel: React.FC<JsonDisplayPanelProps> = ({
     }
   }, [jsonText]);
 
-  const handleSaveJson = () => {
-    if (formattedJson) {
-      const blob = new Blob([formattedJson], { type: 'application/json' });
-      saveAs(blob, jsonDownloadName(fileName));
-    }
-  };
-
-
-
-
-
   const isLargeFile = formattedJson.length > LARGE_FILE_THRESHOLD;
   const extensions = createEditorExtensions(isLargeFile);
 
@@ -77,31 +58,6 @@ const JsonDisplayPanel: React.FC<JsonDisplayPanelProps> = ({
             </div>
           )}
         </div>
-        {(jsonText || error) && (
-          <div className="panel-actions">
-            {jsonText && <button
-              className="action-btn" 
-              onClick={handleSaveJson}
-              title="Save to disk"
-            >
-              💾 Save
-            </button>}
-            <button 
-              className="action-btn" 
-              onClick={onNewFile}
-              title="Clear and upload new file"
-            >
-              📁 New
-            </button>
-            {jsonText && <button
-              className="action-btn" 
-              onClick={onClearData}
-              title="Close editor"
-            >
-              ✖️ Clear
-            </button>}
-          </div>
-        )}
       </div>
 
       {isRenderingJson && (
