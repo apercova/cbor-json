@@ -1,6 +1,15 @@
 # Changelog
 
 2026-10-06:
+Completed the P3 UI accessibility and resilience backlog.
+
+- Added a keyboard accessible file picker button and open the file dialog directly from the Open file action.
+- Added live announcements for loading, indeterminate progress semantics, and an error boundary with a recovery message.
+- Escape now clears the editor selection, and the large-output warning states the 100,000-character threshold accurately.
+- Added the referenced SVG favicon and coverage for the new behaviors.
+- Updated the P3 backlog to mark these items complete.
+
+2026-10-06:
 Added CBOR decoder improvements and aligned output with compatibility and precision requirements.
 
 - Replaced `cbor-js` with the shared `cborg` decoder for browser and CLI, including RFC vectors, depth/input limits, and safer CBOR-to-JSON handling.

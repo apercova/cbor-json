@@ -10,9 +10,9 @@ A modern, responsive React application that converts CBOR (Concise Binary Object
 - **🖥️ CLI Tool**: Convert CBOR files to JSON with required `--in`, optional `--out`, and overwrite protection
 - **📏 Input Limit**: Accepts CBOR files up to 100 MiB in both the browser and CLI
 - **🚀 Drag & Drop Interface**: Simply drag CBOR files onto the upload area
-- **📁 File Browser**: Click to browse and select CBOR files (.cbor, .bin)
+- **📁 File Browser**: Use the keyboard accessible Open file or Choose a file button to select CBOR files (.cbor, .bin)
 - **⚡ Live Conversion**: Real-time conversion from CBOR to JSON with loading indicators
-- **🔄 Quick File Switching**: "New" button for rapid file uploads without clearing current data
+- **🔄 Quick File Switching**: Open file button for rapid file uploads
 - **💾 Save to Disk**: Download converted JSON files with sanitized filenames
 - **🧹 Smart Clear**: Reset to upload new files or return to upload interface
 
@@ -21,8 +21,8 @@ A modern, responsive React application that converts CBOR (Concise Binary Object
 - **📊 Line Numbers**: Easy navigation with line count display
 - **⚙️ Smart File Handling**: 
   - JSON up to 100,000 formatted characters: Editable with syntax highlighting
-  - JSON over 100,000 formatted characters: Uses the large-output editor configuration
-- **⚠️ Large Output Warnings**: Shown when formatted JSON exceeds 100,000 characters
+  - JSON over 100,000 formatted characters: Read-only editor configuration for viewing large output
+- **⚠️ Large Output Warnings**: States the 100,000-character formatted JSON threshold
 - **⌨️ Keyboard Shortcuts**: Standard editor shortcuts (Cmd+A, Escape, etc.)
 - **🔍 Code Folding**: Collapse JSON objects and arrays for better navigation
 
@@ -30,6 +30,8 @@ A modern, responsive React application that converts CBOR (Concise Binary Object
 - **📱 Responsive Design**: Perfect on desktop, tablet, and mobile devices
 - **🖥️ Single Panel Interface**: Clean, focused UI that switches between upload and display
 - **⏳ Loading States**: Professional loading indicators during file processing
+- **⌨️ Accessible Status**: Loading is announced to assistive technology; decoding errors are announced as alerts
+- **🛟 Render Recovery**: An error boundary displays a recovery message if the interface fails to render
 - **✨ Glass Morphism**: Modern design with backdrop blur effects
 - **📏 Adaptive Header**: Title and description adapt to different screen sizes
 - **🎯 Intuitive Navigation**: Clear visual feedback and smooth transitions
@@ -173,13 +175,12 @@ npx serve -s build
    - Visual feedback with drag-over effects
 
 2. **File Browser**: 
-   - Click the upload area to choose a file
+   - Activate **Choose a file** or **Open file** with a mouse or keyboard
    - Select the same file again after a previous conversion if needed
    - Files larger than 100 MiB are rejected before being read
 
-3. **Quick Upload**: 
-   - Use "📁 New" button from JSON panel for rapid file switching
-   - No need to clear current data first
+3. **Quick Upload**:
+   - Use the **Open file** button in the header to choose another file
 
 ### 📋 Working with JSON Output
 
@@ -201,7 +202,7 @@ npx serve -s build
 
 - **⌨️ Keyboard Shortcuts**:
   - `Cmd/Ctrl + A`: Select all JSON content
-  - `Escape`: Clear selection
+  - `Escape`: Collapse the current selection
   - Standard editor navigation
 
 - **🎯 Smart Navigation**:
@@ -250,6 +251,7 @@ vercel.json                   # 🛡️ Vercel security response headers
 src/
 ├── components/               # React components
 │   ├── FileUploadPanel.tsx   # 📤 Upload interface with drag & drop
+│   ├── ErrorBoundary.tsx     # 🛟 Recovery UI for render errors
 │   ├── FileUploadPanel.css   # Upload panel styling
 │   ├── JsonDisplayPanel.tsx  # 📋 JSON viewer with CodeMirror
 │   ├── JsonDisplayPanel.css  # JSON panel styling

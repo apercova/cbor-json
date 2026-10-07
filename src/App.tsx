@@ -69,10 +69,7 @@ function App() {
 
   const handleNewFile = () => {
     clearData();
-    // Directly call the file dialog when upload panel is shown
-    setTimeout(() => {
-      fileUploadRef.current?.openFileDialog();
-    }, 100);
+    fileUploadRef.current?.openFileDialog();
   };
 
   return (
@@ -147,17 +144,16 @@ function App() {
         {openHeaderPane === 'help' && <HelpPane />}
         <div className="panel-container">
           {/* Show upload panel when no data or processing */}
-          {((!jsonText && !decodeError) || isProcessingFile) && (
-            <FileUploadPanel 
-              ref={fileUploadRef}
-              onCborConverted={handleCborConverted}
-              onFileProcessingStart={handleFileProcessingStart}
-              onFileProcessingError={handleFileProcessingError}
-              onError={setDecodeError}
-              decodeOptions={decodeOptions}
-              isProcessing={isProcessingFile}
-            />
-          )}
+          <FileUploadPanel
+            ref={fileUploadRef}
+            onCborConverted={handleCborConverted}
+            onFileProcessingStart={handleFileProcessingStart}
+            onFileProcessingError={handleFileProcessingError}
+            onError={setDecodeError}
+            decodeOptions={decodeOptions}
+            isProcessing={isProcessingFile}
+            hidden={Boolean(jsonText || (decodeError && !isProcessingFile))}
+          />
           
           {/* Show the result panel for decoded JSON or a decode error. */}
           {(jsonText || decodeError) && !isProcessingFile && (

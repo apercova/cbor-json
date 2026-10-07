@@ -131,21 +131,17 @@ styles for the current input styling and CodeMirror behavior.
 
 ## P3 — UI behavior and accessibility
 
-- The upload control cannot be reached from the keyboard. Use a real
-  `<button>` or `<label>` associated with the file input.
-- Give the loading and error regions `aria-live`. The progress bar is
-  indeterminate. Mark it that way.
-- Buttons are emoji with a `title`. Add a visible or `aria-label` name:
-  Save, New, Clear.
-- `handleNewFile` opens the dialog inside `setTimeout(..., 100)`. The
-  user-gesture token can expire, so the dialog may not open. Open it in the
-  click handler.
-- Large-file mode sets CodeMirror `editable={true}` and also
-  `EditorState.readOnly`. Pick one. The 100000 cutoff is the formatted string
-  length. The warning says ">100KB". Make the copy match the check.
-- The Escape keymap returns `true` and does not clear the selection.
-- No React error boundary. A throw in render blanks the page.
-- `public/index.html` requests `favicon.ico`. The file is not in `public/`.
+- [x] The upload control has a keyboard accessible button that opens the hidden
+  file input; drag and drop remains available.
+- [x] Loading status uses `aria-live`; the progress bar has indeterminate
+  progress semantics. Decode errors use `role="alert"`.
+- [x] Save, Open file, and Clear controls have accessible names.
+- [x] `handleNewFile` opens the file dialog directly from the click handler.
+- [x] Large-file warning text describes the 100,000-character formatted JSON
+  threshold. Large-file mode uses CodeMirror's read-only extension.
+- [x] Escape collapses the editor selection while keeping focus.
+- [x] A React error boundary provides a recovery message for render errors.
+- [x] `public/index.html` references the included SVG favicon.
 
 ## P4 — Docs
 

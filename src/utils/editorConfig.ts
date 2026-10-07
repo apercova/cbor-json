@@ -5,6 +5,11 @@ import { selectAll } from '@codemirror/commands';
 import { foldGutter } from '@codemirror/language';
 
 // Shared editor configuration
+export const clearEditorSelection = (view: EditorView) => {
+  view.dispatch({ selection: { anchor: view.state.selection.main.head } });
+  return true;
+};
+
 export const createEditorKeymap = () => keymap.of([
   {
     key: 'Mod-a',
@@ -14,10 +19,7 @@ export const createEditorKeymap = () => keymap.of([
   {
     key: 'Escape',
     preventDefault: true,
-    run: () => {
-      // Clear selection but keep focus
-      return true;
-    },
+    run: clearEditorSelection,
   },
 ]);
 
